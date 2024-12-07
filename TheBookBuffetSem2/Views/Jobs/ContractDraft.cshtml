@@ -1,0 +1,88 @@
+﻿@{
+    ViewBag.Title = "Contract Draft";
+    var recommendedApplicants = ViewBag.RecommendedApplicants as List<TheBookBuffetSem2.Models.Careers.Applicant>;
+    var jobId = ViewBag.JobId;
+}
+
+<div class="container pt-5 pb-5">
+    <h2 class="text-center mb-4">Contract Draft for Recommended Applicants</h2>
+
+    @if (recommendedApplicants != null && recommendedApplicants.Any())
+    {
+        <form method="post" action="@Url.Action("SendContracts", new { jobId = jobId })">
+            @Html.AntiForgeryToken()
+
+            <!-- Display recommended applicants -->
+            <h4>Recommended Applicants:</h4>
+            <ul class="list-group mb-4">
+                @foreach (var applicant in recommendedApplicants)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>@applicant.FullName</strong> - @applicant.Email
+                        </div>
+                        <div class="text-right">
+                            <small>
+                                OCR Score: @(applicant.OCRAccuracy.HasValue ? $"{applicant.OCRAccuracy:F2}%" : "N/A") |
+                                Audio Score: @(applicant.AudioSampleScore.HasValue ? $"{applicant.AudioSampleScore:F2}%" : "N/A") |
+                                <strong>  Overall Score: @(applicant.OverallScore.HasValue ? $"{applicant.OverallScore:F2}%" : "N/A") </strong>
+                            </small>
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <!-- Contract draft text area -->
+            <div class="form-group">
+                <label for="contractText">Contract Draft:</label>
+                <textarea id="contractText" name="contractText" class="form-control" rows="10" required>
+Dear [Applicant Name],
+
+We are pleased to offer you the position of [Job Title] at The Book Buffet. The terms of the contract are as follows:
+
+- Compensation: [Salary per book recorded].
+- Hours: Flexible, based on recording assignments.
+
+
+Recording Terms and Responsibilities:
+
+As a [Job Title] at The Book Buffet, your primary responsibility will be to record and deliver high-quality audio versions of assigned books. 
+You will be expected to:
+
+- Deliver fully edited and error-free audio recordings.
+- Meet the technical specifications provided by The Book Buffet (such as file format, audio quality, and chapter timing).
+- Complete each assigned book by the specified deadline, typically within [number of days/weeks] from the date of assignment.
+- Communicate any potential delays promptly to ensure alternative arrangements can be made if necessary.
+- Ownership and Intellectual Property:
+
+By signing this contract, you acknowledge and agree that all recordings made as part of your employment are the exclusive property of The Book Buffet.
+This includes all rights to distribute, modify, or repurpose the audio files. 
+You will not be entitled to any additional compensation beyond the agreed-upon salary for the use of these recordings in any form.
+
+Non-Disclosure and Confidentiality:
+
+During your employment, you may have access to unpublished manuscripts or sensitive content. 
+You agree not to disclose or share any materials provided to you by The Book Buffet with any third parties.
+ Breach of confidentiality will result in immediate termination and potential legal action.
+
+Termination Clause:
+
+The Book Buffet reserves the right to terminate the agreement without notice in the event of a breach of contract or failure to meet the required
+ quality standards and deadlines.
+
+
+
+Best regards,  
+The Book Buffet Team
+                </textarea>
+            </div>
+
+            <!-- Send Contracts Button -->
+            <button type="submit" class="btn btn-success">Send Contracts</button>
+        </form>
+    }
+    else
+    {
+        <div class="alert alert-warning">No recommended applicants found.</div>
+    }
+</div>

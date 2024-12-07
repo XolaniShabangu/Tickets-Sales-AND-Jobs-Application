@@ -1,0 +1,13 @@
+﻿@model TheBookBuffetSem2.Models.Careers.Applicant
+
+<div class="container text-center pt-5">
+    <h2>Application Failed</h2>
+    <p>@ViewBag.Message</p>
+    <a href="@Url.Action("AccessJobs", "Jobs")" class="btn btn-primary">Back to Job Listings</a>
+</div>
+
+@{
+    ViewBag.Title = "Application Failed";
+}
+
+

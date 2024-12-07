@@ -1,0 +1,27 @@
+﻿@model TheBookBuffetSem2.Models.Author
+
+@{
+    ViewBag.Title = "Edit Author";
+}
+
+<h2>Edit Author</h2>
+
+@using (Html.BeginForm("EditAuthor", "Management", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.AuthorID)
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Name)
+        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Email)
+        @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+    </div>
+
+    <input type="submit" value="Save Changes" class="btn btn-primary" />
+}

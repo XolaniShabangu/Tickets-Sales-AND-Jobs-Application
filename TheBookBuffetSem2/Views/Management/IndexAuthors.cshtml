@@ -1,0 +1,30 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Author>
+
+@{
+    ViewBag.Title = "Authors";
+}
+
+<h2>Authors</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var author in Model)
+        {
+            <tr>
+                <td>@author.Name</td>
+                <td>@author.Email</td>
+                <td>
+                    <a href="@Url.Action("EditAuthor", "Management", new { id = author.AuthorID })" class="btn btn-primary">Edit</a>
+                    <a href="@Url.Action("DeleteAuthor", "Management", new { id = author.AuthorID })" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

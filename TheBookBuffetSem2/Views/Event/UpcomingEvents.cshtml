@@ -1,0 +1,181 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.EventVenueViewModel>
+
+@{
+    ViewBag.Title = "Upcoming Events";
+}
+
+<section id="upcoming-events" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Upcoming Book Launches</h2>
+        <div class="row">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    if (item.Event != null && item.Venue != null && item.Event.LaunchDate >= DateTime.Now) // Filter out past events
+                    {
+                        var totalTickets = item.Tickets.Sum(t => t.TotalTickets);  // Total tickets for the event
+                        var remainingTickets = item.Tickets.Sum(t => t.RemainingTickets);  // Remaining tickets for the event
+                        var soldTickets = totalTickets - remainingTickets;  // Calculate sold tickets
+
+                        <div class="col-md-4">
+                            <div class="card mb-4 position-relative">
+                                <!-- Check if event is sold out -->
+                                @if (remainingTickets == 0)
+                                {
+                                    <div class="sold-out-banner">Sold Out</div>
+                                }
+                                <!-- Directly use the Photos property for the image source -->
+                                <img class="card-img-top" src="@item.Venue.Photos" alt="Event image">
+
+                                <div class="card-body">
+                                    <div class="mb-2" style="opacity: 0.5; font-size: small; font-style: italic;">
+                                        <span>Going: @soldTickets</span> | <span>Tickets Left: @remainingTickets</span>
+                                    </div>
+                                    <h5 class="card-title">@item.Event.BookTitle</h5>
+                                    <p class="card-text">
+                                        <strong>@item.Event.LaunchDate.ToString("MMMM dd, yyyy h:mm tt")</strong><br>
+                                        <span>@item.Event.Author</span><br>
+                                        <span>@item.Venue.Name</span>
+                                    </p>
+                                    <div id="countdown_@item.Event.EventId" class="mb-2"></div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseTickets_@item.Event.EventId" aria-expanded="false" aria-controls="collapseTickets_@item.Event.EventId">
+                                            Show Tickets
+                                        </button>
+                                        <div class="collapse mt-2" id="collapseTickets_@item.Event.EventId">
+                                            <ul class="list-group">
+                                                @if (item.Tickets != null && item.Tickets.Any())
+                                                {
+                                                    foreach (var ticket in item.Tickets)
+                                                    {
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            @ticket.Category Ticket
+                                                            <span class="badge badge-primary badge-pill">@ticket.Price.ToString("C")</span>
+                                                        </li>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <li class="list-group-item">No tickets available</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                        <a href="@Url.Action("BuyTicket", "Tickets", new { eventId = item.Event.EventId })" class="btn btn-success mt-2">Buy Now!!</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+            else
+            {
+                <p>No upcoming events found.</p>
+            }
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: #333; /* Darker text color for readability */
+            position: relative;
+        }
+
+        .card-title, .card-text, .list-group-item {
+            color: #333; /* Set a dark color for text */
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .list-group-item {
+            background-color: transparent;
+            color: #333; /* Set a dark color for text */
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .badge-pill {
+            background-color: #f8f9fa; /* Light background for the badge */
+            color: #333; /* Dark text color for the price */
+            font-weight: bold; /* Make the price text bold */
+        }
+
+        /* Sold Out banner styles */
+        .sold-out-banner {
+            position: absolute;
+            top: 20px;
+            left: -40px;
+            background-color: red;
+            color: white;
+            padding: 10px 40px;
+            transform: rotate(-45deg);
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 10;
+            opacity: 0.8;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        @foreach (var item in Model)
+        {
+            <text>
+                setInterval(function() {
+                    updateCountdown('@item.Event.EventId', '@item.Event.LaunchDate.ToString("yyyy-MM-ddTHH:mm:ss")');
+                }, 1000);
+            </text>
+        }
+    });
+
+    function updateCountdown(eventId, launchDate) {
+        var countDownDate = new Date(launchDate).getTime();
+        var now = new Date().getTime();
+        var distance = countDownDate - now;
+
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        var countdownElement = document.getElementById("countdown_" + eventId);
+        countdownElement.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+        if (distance < 0) {
+            countdownElement.innerHTML = "Event has started!";
+        } else if (distance <= 86400000) { // 86400000 milliseconds = 24 hours
+            countdownElement.style.color = "red";
+        } else {
+            countdownElement.style.color = ""; // Reset to default if more than 24 hours
+        }
+    }
+    </script>
+
+}

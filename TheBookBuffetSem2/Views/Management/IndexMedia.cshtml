@@ -1,0 +1,30 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Media>
+
+@{
+    ViewBag.Title = "Media Contacts";
+}
+
+<h2>Media Contacts</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Organization Name</th>
+            <th>Email</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var media in Model)
+        {
+            <tr>
+                <td>@media.Name</td>
+                <td>@media.Email</td>
+                <td>
+                    <a href="@Url.Action("EditMedia", "Management", new { id = media.MediaID })" class="btn btn-primary">Edit</a>
+                    <a href="@Url.Action("DeleteMedia", "Management", new { id = media.MediaID })" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

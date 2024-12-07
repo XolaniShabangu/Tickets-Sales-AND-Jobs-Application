@@ -1,0 +1,26 @@
+﻿@model TheBookBuffetSem2.Models.Media
+
+@{
+    ViewBag.Title = "Add Media Contact";
+}
+
+<h2>Add Media Contact</h2>
+
+@using (Html.BeginForm("CreateMedia", "Management", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Name)
+        @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Email)
+        @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+    </div>
+
+    <input type="submit" value="Save" class="btn btn-primary" />
+}

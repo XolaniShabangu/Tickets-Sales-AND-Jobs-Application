@@ -1,0 +1,48 @@
+﻿@*@model TheBookBuffetSem2.Models.Careers.Applicant
+
+    <div class="container text-center pt-5">
+        <h2>Audio Submitted Successfully!</h2>
+        <p>Your Audio Sample has been submitted to our recruiters and will be analyzed and you will be answered soon</p>
+        <p>You tried @Model.AudioRetryCount time(s) </p>
+
+        <a href="@Url.Action("TrackApplications", "Jobs", new { applicantId = Model.ApplicantId })" class="btn btn-primary">
+            Track Your Progress
+        </a>
+    </div>*@
+
+@model TheBookBuffetSem2.Models.Careers.Applicant
+
+<div class="container text-center pt-5">
+    <h2>Audio Submitted Successfully!</h2>
+
+    <p>Your audio sample has been submitted and analyzed by our system.</p>
+
+    <h3>Analysis Results</h3>
+
+    <div class="text-left mt-4">
+        <p><strong>Original Text:</strong></p>
+        <blockquote class="blockquote">
+            @ViewBag.OriginalText
+        </blockquote>
+
+        <p><strong>Recognized Text (from your audio):</strong></p>
+        <blockquote class="blockquote">
+            @ViewBag.RecognizedText
+        </blockquote>
+
+        <p><strong>Levenshtein Distance:</strong> @ViewBag.LevenshteinDistance</p>
+        <p><strong>Similarity Score:</strong> @ViewBag.SimilarityScore%</p>
+
+
+        <hr />
+
+        <p>You have tried @Model.AudioRetryCount time(s).</p>
+        <p><strong>Status:</strong> The recruiter will review this submission shortly.</p>
+    </div>
+
+    <a href="@Url.Action("TrackApplications", "Jobs", new { applicantId = Model.ApplicantId })" class="btn btn-primary mt-4">
+        Track Your Progress
+    </a>
+</div>
+
+

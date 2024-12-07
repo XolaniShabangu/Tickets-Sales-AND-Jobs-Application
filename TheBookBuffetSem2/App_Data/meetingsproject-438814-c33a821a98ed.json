@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "meetingsproject-438814",
+  "private_key_id": "c33a821a98ed9ef41d853a2c7d1a49f332802e03",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC/hYnswgGmKPDA\nLG2YqpsGc28y8zeKPykXXiKdtYSkFa3xl+x8nWgvuckQs4OF6Ha2ScgLvcnaoQvq\nOW/u/2SVqIheDWTPp03zcjJGuh5XENrq5Z6J4GQ2T6ezx0D2pEn4ibeYLREozkgn\nU56Bo8Gs3ZA1+QzJHswx9HDXo4k1YYMBNU6udQ3dKngCrzJqp0KEGTMloM0ZDrEx\nDMUJ3wwLKMokKCqmB2sxvoiuymqGrWxV0Hgamn9wFt8rWt4EDM7EkM+ZfktaHPFW\nIRhwrWaru1v+ikQPFN4AahBUmyTKNBUIEl7ULyklKVT9IRaJUr9XJT1paGtfvzL0\ncwipAErDAgMBAAECggEASTcGFoXF9pzRCE4TqZiSwgEQAfS7hzSFA2NfrVWOeuG0\nyNZQuAS+pvwJcsKFZYQMGbyT5nUrvNHzCZvigAWPEK1IUFgjcUSehpHhyWruHU+a\nuNCF7mRjOuXxkMb7vS3p/0K6dkjINgbBy5LqVdnhuLFMp21pZ1tIKVKubqkcU1Sk\nIjCAOi7AseW1KtpIUIvpXDfZ4GZfrhr62JpbkTXEkJuhey/HWXgrHeQ8JktcTggM\nXA6T7S9vVCp4RkPUZmb/4WpaKiDXin6LCuZXq/pqlEOz9zKx1nRLGegio0OAgqoR\npQPuZS836AesJusQVnFhLTcamG9YIpWTacf2Eqqg6QKBgQD/nqRQTWaXIF4+gG9T\nq49EOCgZpNb1t6tsqW38Ns2FpK3OV4T6UIOUNeLCpxjQVUGMJ5ow0hcQuTKnBdVn\nobSXU2hThlPrMxjQk5xZTLhWl8NzFeMK1QgmF2zg5/2ntpvJG7k+29IEAmAwfvl7\nyA9hFtU7YuM01WpJ20H52O0suwKBgQC/znvbukGCfz1WtisYTUWJWUolAuDHvJaM\nQp14PlxMaebHZHX/rYioIMH3nP2lB83vZOz396ii9W2zJmoTfuz9XO8f1gKLKDdE\n8/sH8P5R4YTCYeEnpmlhh3G86SMVL+Sp60JW4Ensf9TLYndqbZ7TCIYVjpnZDN8M\nrJ7BkUg9mQKBgCN6WUPr+jkvfOUf3lO2lAPb53TntA4Wl+xU97bxxESwPo9NBl/X\nnOuNLxPlLUR9EMPrGzN7dUgU7DrSTHQ9tVrrcKdnFW6ngOIyGpkqVMtv9OicOQ7f\n0mm3Bp2QlVwZtDWNa4CV8egsjD0u4mGTus625JGBgBdtJ3touxd6TDDRAoGATAVT\n0+/LfSRfNFn5VKVztQ9dsrOkUaXuaWMRtJHK1UJ4BHlNx2uJKVHqbvCbG2ivd32h\n6loPTZ9GvmWwT0/UMEtAP3b8BRmIZlzpFumucteWXdCbg7KSO+SJ8NzaWdBkqfAj\nl/lHc2Pq/D1npRgThgLv2eVuFrfiQ8y7E284makCgYAX/S0fvHg3pCavyAdh2QbP\nsgtuqxH9MG/zI5ADld8UDs/Xc2RRm1qwy7FCxkDd12R6c5zZ1nBBjno9YnZCT4Ez\nIU377VwsaPGR5hamfFFfoJ0UxZFvpHQCt4KYpnCG89ipOigL/LZ+9EglCnTXcp2I\nixoY0X1ldhD1Iv8r2HexKQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "thebookbuffetscheduler@meetingsproject-438814.iam.gserviceaccount.com",
+  "client_id": "100110406624027517126",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/thebookbuffetscheduler%40meetingsproject-438814.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

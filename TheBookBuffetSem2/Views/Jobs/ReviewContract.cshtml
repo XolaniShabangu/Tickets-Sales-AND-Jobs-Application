@@ -1,0 +1,102 @@
+﻿@model TheBookBuffetSem2.Models.Careers.Applicant
+
+<div class="container pt-5 pb-5">
+    <h2 class="text-center mb-4">Review Your Job Offer</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Contract Details</h4>
+        </div>
+        <div class="card-body">
+            <pre>@ViewBag.ContractText</pre>
+        </div>
+        <div class="card-footer">
+            <!-- Signature Section -->
+            <h5>Sign the contract:</h5>
+            <p>Please sign below using your mouse or touchpad:</p>
+
+            <!-- Canvas for signature -->
+            <canvas id="signatureCanvas" width="400" height="200" style="border:1px solid #000;"></canvas>
+            <br />
+            <button type="button" class="btn btn-secondary mt-2" onclick="clearSignature()">Clear Signature</button>
+
+            <!-- Signature validation message -->
+            <p id="signatureMessage" style="color: red; display: none;">Please provide a signature before submitting.</p>
+
+            <!-- Accept form -->
+            <form id="acceptForm" method="post" action="@Url.Action("SignContract", new { applicantId = Model.ApplicantId, accept = true })">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-success mt-3" id="acceptButton" disabled>Accept Offer</button>
+            </form>
+
+            <!-- Reject form -->
+            <form id="rejectForm" method="post" action="@Url.Action("SignContract", new { applicantId = Model.ApplicantId, accept = false })">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger mt-3" id="rejectButton" disabled>Reject Offer</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let canvas = document.getElementById('signatureCanvas');
+        let ctx = canvas.getContext('2d');
+        let drawing = false;
+        let hasSigned = false;
+
+        // Event listeners for drawing
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        function startDrawing(e) {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            if (drawing) {
+                hasSigned = true;
+                enableSubmitButtons();
+            }
+            drawing = false;
+        }
+
+        function enableSubmitButtons() {
+            if (hasSigned) {
+                document.getElementById('acceptButton').disabled = false;
+                document.getElementById('rejectButton').disabled = false;
+                document.getElementById('signatureMessage').style.display = 'none'; // Hide warning
+            }
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSigned = false;
+            document.getElementById('acceptButton').disabled = true;
+            document.getElementById('rejectButton').disabled = true;
+            document.getElementById('signatureMessage').style.display = 'block'; // Show warning if signature is required
+        }
+
+        // Prevent form submission if the signature is not provided
+        function validateSignature(event) {
+            if (!hasSigned) {
+                event.preventDefault();  // Block form submission
+                document.getElementById('signatureMessage').style.display = 'block';
+            }
+        }
+
+        // Attach validateSignature to both forms' submission events
+        document.getElementById('acceptForm').addEventListener('submit', validateSignature);
+        document.getElementById('rejectForm').addEventListener('submit', validateSignature);
+    </script>
+}

@@ -1,0 +1,200 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Careers.Job>
+
+@{
+    ViewBag.Title = "Access Job Listings";
+    var appliedJobIds = ViewBag.AppliedJobIds as List<int>; // Get list of job IDs that the user has applied for
+}
+
+<div class="container pt-5 pb-5">
+    <h2 class="text-center mb-4" style="color: #0056b3;">Jobs Available</h2> <!-- Blue Heading -->
+    <!-- Search bar -->
+    <div class="row mb-4 justify-content-center">
+        <div class="col-md-4">
+            <input type="text" id="searchJob" class="form-control" placeholder="Search jobs...">
+        </div>
+    </div>
+
+    <div class="text-center">
+        <a href="@Url.Action("TrackApplications", "Jobs")" class="btn btn-info mt-4">Track My Applications</a>
+        <p style="font-size: small; font-style: italic;">*must be logged in*</p>
+    </div>
+
+    <div class="row">
+        <!-- Job List on the Left -->
+        <div class="col-md-4 job-list">
+            <ul id="jobList" class="list-group">
+                @foreach (var job in Model)
+                {
+                    <li class="list-group-item job-item" data-jobid="@job.JobId" onclick="showJobDetails(@job.JobId)">
+                        <h5 style="color: #0056b3;">@job.Title</h5> <!-- Blue Job Titles -->
+                        <!-- Truncated description for the list -->
+                        <p class="small">
+                            @(job.Description.Length > 100 ? job.Description.Substring(0, 100) + "..." : job.Description)
+                        </p>
+                        <p class="small text-muted">Closing Date: @job.ClosingDate.ToString("dd MMM yyyy")</p>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <!-- Job Details on the Right (scrollable) -->
+        <div class="col-md-8">
+            <div id="jobDetails" class="card d-none">
+                <div class="card-body job-details-body">
+                    <div id="countdown" class="mb-3 text-danger font-weight-bold"></div> <!-- Countdown Timer -->
+                    <h5 id="jobTitle" class="card-title" style="color: #0056b3;"></h5> <!-- Blue Job Title -->
+                    <p id="jobDescription" class="card-text"></p>
+                    <h6 style="color: #0056b3;">Requirements:</h6> <!-- Blue Section Title -->
+                    <p id="jobRequirements"></p>
+                    <h6 style="color: #0056b3;">Closing Date:</h6> <!-- Blue Section Title -->
+                    <p id="jobClosingDate"></p>
+
+                    <!-- Apply Now button -->
+                    <a href="#" id="applyLink" class="btn btn-primary">Apply Now</a>
+                    <p id="applyText" class="text-muted" style="font-size: small; font-style: italic;">*must be logged in*</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const jobs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+        const appliedJobIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.AppliedJobIds));
+
+        // Search functionality
+        document.getElementById('searchJob').addEventListener('keyup', function () {
+            const searchValue = this.value.toLowerCase();
+            const jobItems = document.querySelectorAll('.job-item');
+            jobItems.forEach(item => {
+                const jobTitle = item.querySelector('h5').textContent.toLowerCase();
+                if (jobTitle.includes(searchValue)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Show job details when clicking on a job
+        function showJobDetails(jobId) {
+            const job = jobs.find(j => j.JobId === jobId);
+
+            if (job) {
+                // Populate the job details on the right
+                document.getElementById('jobTitle').textContent = job.Title;
+                document.getElementById('jobDescription').textContent = job.Description;
+                document.getElementById('jobRequirements').textContent = job.Qualifications;
+                document.getElementById('jobClosingDate').textContent = new Date(job.ClosingDate).toLocaleDateString('en-US', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                // Show the countdown
+                startCountdown(new Date(job.ClosingDate));
+
+                // Check if the user has already applied for the job
+                const hasAlreadyApplied = appliedJobIds.includes(jobId);
+
+                // Update the Apply Now button with the link to the Apply action, including jobId
+                const applyLink = document.getElementById('applyLink');
+                const applyText = document.getElementById('applyText');
+
+                if (hasAlreadyApplied) {
+                    applyLink.style.display = 'none'; // Hide the Apply Now button
+                    applyText.textContent = 'You have already applied for this job.';
+                } else {
+                    applyLink.style.display = 'inline-block'; // Show the Apply Now button
+                    applyLink.href = '@Url.Action("Apply", "Jobs")' + '?jobId=' + jobId;
+                    applyText.textContent = '*must be logged in*';
+                }
+
+                // Add animation and show the job details
+                const detailsCard = document.getElementById('jobDetails');
+                detailsCard.classList.remove('d-none');
+                detailsCard.classList.add('animate-details');
+            }
+        }
+
+        // Countdown Timer function
+        function startCountdown(closingDate) {
+            const countdownElement = document.getElementById('countdown');
+
+            function updateCountdown() {
+                const now = new Date();
+                const timeDifference = closingDate - now;
+                const daysLeft = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+                if (timeDifference <= 0) {
+                    countdownElement.textContent = 'Closed';
+                    countdownElement.classList.add('text-danger');
+                    clearInterval(countdownInterval); // Stop the countdown
+                } else {
+                    countdownElement.textContent = `${daysLeft} day(s) left`;
+                    countdownElement.classList.remove('text-danger');
+                    countdownElement.classList.add('text-warning');
+                }
+            }
+
+            updateCountdown(); // Initial call
+            const countdownInterval = setInterval(updateCountdown, 1000 * 60 * 60 * 24); // Update once per day
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .job-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .job-item {
+            cursor: pointer;
+            border: 1px solid #0056b3; /* Blue outline */
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .job-item:hover {
+            background-color: #e0f7ff; /* Light blue hover effect */
+            border-color: #003f7f; /* Darker blue on hover */
+        }
+
+        /* Scrollable job details section */
+        .job-details-body {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        /* Animation for the job details expansion */
+        .animate-details {
+            animation: fadeInRight 0.5s ease forwards;
+        }
+
+        @@keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .card {
+            background-color: #ffffff; /* Make card background more distinct */
+            border: none;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Increased shadow effect */
+        }
+
+        /* Countdown Timer Styling */
+        #countdown {
+            font-size: 18px;
+        }
+    </style>
+}

@@ -1,0 +1,180 @@
+﻿@model TheBookBuffetSem2.Models.SurveyViewModel
+<section id="survey-section" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <form action="@Url.Action("SubmitSurvey", "Customer")" method="post" class="survey-form" id="surveyForm">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.EventId)
+            @Html.HiddenFor(m => m.InvitationId)
+
+            <div class="card survey-card">
+                <div class="card-body">
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        <div class="question-block">
+                            <label>@(i + 1). @Model.Questions[i].QuestionText</label>
+                            <div class="options">
+                                @for (int j = 1; j <= 5; j++)
+                                {
+                                    <label class="option-label">
+                                        @Html.RadioButtonFor(m => m.Questions[i].SelectedRating, j) <span>@j</span>
+                                    </label>
+                                }
+                            </div>
+                            <div class="validation-message text-danger" id="validation-message-@i"></div>
+                        </div>
+                    }
+
+                    <div class="submit-block">
+                        <button type="submit" class="btn btn-primary submit-btn">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50; /* Matching the rest of the system */
+            color: #ecf0f1;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        #survey-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .survey-form {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .survey-card {
+            background: #1c1c2b;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            margin: 0 auto; /* Centering the card */
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .question-block {
+            margin-bottom: 20px;
+        }
+
+            .question-block label {
+                display: block;
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+        .options {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+
+            .option-label input[type="radio"] {
+                display: none;
+            }
+
+            .option-label span {
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                border-radius: 50%;
+                background: #2b2b3c;
+                text-align: center;
+                color: #ffffff;
+                margin-right: 10px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .option-label input[type="radio"]:checked + span {
+                background: #ff0080;
+                color: #ffffff;
+                box-shadow: 0 0 10px rgba(255, 0, 128, 0.7);
+            }
+
+        .submit-block {
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: #ff0080;
+            border: none;
+            padding: 15px 30px;
+            color: #ffffff;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+            .submit-btn:hover {
+                background: #ff8c00;
+            }
+
+        .validation-message {
+            display: none;
+            font-size: 14px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // This function will be called when the form is successfully submitted
+        function showAlertOnSubmit() {
+            alert('Thank you! Your survey has been submitted successfully.');
+        }
+
+        // Attach the function to the form's submit event
+        document.addEventListener("DOMContentLoaded", function () {
+            var form = document.querySelector('#surveyForm');
+            form.onsubmit = function (event) {
+                var isValid = true;
+
+                // Validate that each question has a selected rating
+                var questionBlocks = document.querySelectorAll('.question-block');
+                questionBlocks.forEach(function (block, index) {
+                    var radios = block.querySelectorAll('input[type="radio"]');
+                    var isChecked = Array.from(radios).some(radio => radio.checked);
+
+                    var validationMessage = document.getElementById('validation-message-' + index);
+                    if (!isChecked) {
+                        isValid = false;
+                        validationMessage.textContent = 'Please select a rating.';
+                        validationMessage.style.display = 'block';
+                    } else {
+                        validationMessage.style.display = 'none';
+                    }
+                });
+
+                // If the form is not valid, prevent submission
+                if (!isValid) {
+                    event.preventDefault();
+                } else {
+                    showAlertOnSubmit();
+                }
+            };
+        });
+    </script>
+}

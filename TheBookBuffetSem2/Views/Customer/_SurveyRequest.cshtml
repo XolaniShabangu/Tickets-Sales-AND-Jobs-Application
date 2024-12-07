@@ -1,0 +1,74 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Event>
+
+@if (Model.Any())
+{
+    <div class="survey-requests-container">
+        <div class="survey-requests">
+            @foreach (var ev in Model)
+            {
+                <div class="card mb-4 survey-card" onclick="location.href='@Url.Action("TakeSurvey", "Customer", new { eventId = ev.EventId })'">
+                    <div class="card-body">
+                        <h5 class="card-title">Survey Request</h5>
+                        <p class="card-text">Would you like to participate in a survey of @ev.BookTitle?</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <style>
+        .survey-requests-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .survey-requests {
+            position: relative;
+            width: 300px; /* Adjust this width to fit the cards in the middle */
+        }
+
+        .survey-card {
+            position: absolute;
+            width: 100%;
+            background-color: #343a40;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+        }
+
+        .survey-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Bouncing animation */
+        @@keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @for (int i = 0; i < Model.Count(); i++)
+        {
+            <text>
+                .survey-card:nth-child(@(i + 1)) {
+                    top: @(i * 20)px;
+                    z-index: @(10 - i);
+                    opacity: @(1.0 - i * 0.1);
+                }
+            </text>
+        }
+    </style>
+}

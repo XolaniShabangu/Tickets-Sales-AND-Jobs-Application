@@ -1,0 +1,312 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Careers.Applicant>
+
+<div class="container pt-5 pb-5">
+    <h2 class="text-center mb-4">Track Your Applications</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">You haven't applied to any jobs yet.</div>
+    }
+    else
+    {
+        foreach (var applicant in Model)
+        {
+            <div class="card mb-4 applicant-card @((applicant.IsCanceled ? "canceled-card" : "")) @((applicant.OverallScore.HasValue && applicant.OverallScore < 70 ? "disqualified-card" : ""))" id="applicant-@applicant.ApplicantId">
+
+                <!-- Watermark Section -->
+                @if (applicant.IsCanceled)
+                {
+                    <div class="watermark">Canceled</div>
+                }
+                else if (applicant.AudioSampleScore.HasValue && applicant.OverallScore < 70)
+                {
+                    <div class="watermark">Disqualified</div>
+                }
+                else if (applicant.JobStatus == "Accepted")
+                {
+                    <div class="watermark">Hired</div>
+                }
+                else if (applicant.JobStatus == "Rejected")
+                {
+            <div class="watermark">Job Rejected</div>
+                }
+
+                <div class="card-header" style="background-color: #1e3a8a; color: white; cursor: pointer;" onclick="toggleDetails(@applicant.ApplicantId)">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">@applicant.Job.Title</h5>
+                            <small class="text-light">Application Date: @applicant.ApplicationDate.ToString("g")</small>
+                        </div>
+                        <div style="flex-grow: 1; text-align: center;">
+                            <!-- Reminder for Audio Sample deadline -->
+                            @if (applicant.OCRStatus == "Passed" && string.IsNullOrEmpty(applicant.AudioBlobUrl) && !applicant.IsCanceled)
+                            {
+                                // Calculate countdown based on closing date or 2 days after OCR passed
+                                var remainingDays = 0;
+                                if (applicant.Job.ClosingDate <= DateTime.Now.AddDays(2))
+                                {
+                                    remainingDays = (applicant.Job.ClosingDate - DateTime.Now).Days;
+                                }
+                                else if (applicant.OCRPassedDate.HasValue)
+                                {
+                                    remainingDays = (applicant.OCRPassedDate.Value.AddDays(2) - DateTime.Now).Days;
+                                }
+
+                                if (remainingDays > 0)
+                                {
+                                    <span class="badge badge-warning" style="color:aqua;">@(remainingDays) day(s) left for Audio Sample</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger" style="color:red">Complete Audio Sample ASAP</span>
+                                }
+                            }
+
+                            <span>
+                                <!-- Show JobStatus for the applicant -->
+                                @if (!string.IsNullOrWhiteSpace(applicant.JobStatus))
+                                {
+                                    <span class="badge badge-info">Job Status: @applicant.JobStatus</span>
+                                }
+
+                                <!-- Show "View Contract" button if job status is "Offered", "Accepted", or "Rejected" -->
+                                @if (applicant.JobStatus == "Offered")
+                                {
+                                    <a href="@Url.Action("ReviewContract", "Jobs", new { applicantId = applicant.ApplicantId })" class="btn btn-primary btn-sm mt-2">
+                                        View Contract
+                                    </a>
+                                }
+                            </span>
+                        </div>
+
+                        <div>
+                            <span class="badge badge-success">Overall Score: @(applicant.OverallScore.HasValue ? $"{applicant.OverallScore:F2}%" : "N/A")</span>
+
+                            <button class="btn btn-light btn-sm expand-btn" id="expand-btn-@applicant.ApplicantId">Expand</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Progress Bar Section -->
+                <div class="progress-bar-section" id="progress-bar-@applicant.ApplicantId">
+                    <div class="progress mb-3" style="height: 30px; background-color: #e9ecef;">
+                        <!-- OCR Stage -->
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: @(applicant.OCRStatus == "Passed" ? "50%" : "0%")">
+                            OCR
+                        </div>
+                        <!-- Audio Sample Stage -->
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: @(string.IsNullOrEmpty(applicant.AudioBlobUrl) ? "0%" : "50%")">
+                            Audio
+                        </div>
+                        <!-- Contract Stage (Added) -->
+                        @if (applicant.JobStatus == "Offered")
+                        {
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 100%;">
+                                Contract
+                            </div>
+                        }
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>@(applicant.OCRStatus == "Passed" ? "OCR Passed" : "OCR Pending")</span>
+                        <span>@(string.IsNullOrEmpty(applicant.AudioBlobUrl) ? "Audio Sample Pending" : "Audio Sample Completed")</span>
+                    </div>
+                </div>
+
+                <!-- Hidden section for details, shown when expanded -->
+                <div class="card-body d-none" id="applicant-details-@applicant.ApplicantId">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <!-- Scores Section -->
+                            <div class="scores mt-3">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6>OCR Score:</h6>
+                                        <p>@applicant.OCRAccuracy%</p>
+                                    </div>
+                                    <div>
+                                        <h6>Audio Sample Score:</h6>
+                                        <p>@(applicant.AudioSampleScore.HasValue ? $"{applicant.AudioSampleScore:F2}%" : "N/A")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 text-right">
+                            <!-- Document Thumbnails -->
+                            <div class="document-thumbnails">
+                                <img src="https://appdev3project.blob.core.windows.net/other/cvthumb.png" class="img-thumbnail" alt="CV" onclick="openDocument('@applicant.CVBlobUrl')" />
+                                <img src="https://appdev3project.blob.core.windows.net/other/idthumb.png" class="img-thumbnail" alt="ID" onclick="openDocument('@applicant.IDBlobUrl')" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Footer for Action Buttons -->
+                @if (!applicant.IsCanceled &&
+                    (!(applicant.OverallScore.HasValue && applicant.OverallScore < 70) ||
+                     !applicant.AudioSampleScore.HasValue))
+                {
+                    <div class="card-footer d-none" id="applicant-footer-@applicant.ApplicantId">
+
+                        @if (string.IsNullOrEmpty(applicant.AudioBlobUrl) && applicant.Job.ClosingDate > DateTime.Now)
+                        {
+                            <button class="btn btn-primary" onclick="startAudioSample(@applicant.ApplicantId)">Do Audio Sample</button>
+                        }
+
+                        @if (string.IsNullOrEmpty(applicant.AudioBlobUrl) && !applicant.AudioSampleScore.HasValue)
+                        {
+                            <!-- Show Cancel Application button only if AudioBlobUrl is empty -->
+                            <button class="btn btn-danger" onclick="confirmCancelApplication(@applicant.ApplicantId)">Cancel Application</button>
+                        }
+
+                    </div>
+                }
+
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function toggleDetails(applicantId) {
+            var detailsSection = document.getElementById('applicant-details-' + applicantId);
+            var footerSection = document.getElementById('applicant-footer-' + applicantId);
+            var expandButton = document.getElementById('expand-btn-' + applicantId);
+
+            if (detailsSection.classList.contains('d-none')) {
+                detailsSection.classList.remove('d-none');
+                footerSection.classList.remove('d-none');
+                expandButton.textContent = 'Collapse';
+            } else {
+                detailsSection.classList.add('d-none');
+                footerSection.classList.add('d-none');
+                expandButton.textContent = 'Expand';
+            }
+        }
+
+        function openDocument(url) {
+            var modal = document.createElement('div');
+            modal.classList.add('modal');
+            modal.innerHTML = `
+                                                                               <div class="modal-content">
+                                                                                    <iframe src="/Jobs/ViewDocument?documentUrl=${encodeURIComponent(url)}" width="100%" height="600px"></iframe>
+                                                                                    <button class="btn btn-danger" onclick="closeModal()">Close</button>
+                                                                              </div>
+                                                                           `;
+            document.body.appendChild(modal);
+        }
+
+        function closeModal() {
+            var modal = document.querySelector('.modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function startAudioSample(applicantId) {
+            window.location.href = '/Jobs/DoAudioSample?applicantId=' + applicantId;
+        }
+
+        function confirmCancelApplication(applicantId) {
+            if (confirm('Are you sure you want to cancel this application?')) {
+                $.ajax({
+                    url: '/Jobs/CancelApplication',
+                    type: 'POST',
+                    data: { applicantId: applicantId },
+                    success: function (response) {
+                        alert('Application canceled successfully.');
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Failed to cancel application. Please try again.');
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .applicant-card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .expand-btn {
+            margin-left: 10px;
+        }
+
+        .document-thumbnails img {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+
+        .progress-bar-section {
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+
+        .progress-bar {
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 800px;
+        }
+
+        /* Watermark for Canceled, Disqualified, Hired, or Rejected Applications */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            color: rgba(0, 0, 26, 0.52);
+            font-weight: bold;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .canceled-card {
+            position: relative;
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+
+        .disqualified-card {
+            position: relative;
+            background-color: rgba(255, 165, 0, 0.1);
+        }
+
+        .hired-card {
+            position: relative;
+            background-color: rgba(0, 128, 0, 0.1);
+        }
+
+        .declined-card {
+            position: relative;
+            background-color: rgba(128, 0, 0, 0.1);
+        }
+    </style>
+}

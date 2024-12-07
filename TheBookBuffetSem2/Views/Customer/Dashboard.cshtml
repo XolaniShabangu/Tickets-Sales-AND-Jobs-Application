@@ -1,0 +1,241 @@
+﻿@{
+    ViewBag.Title = "Welcome to The Book Buffet";
+    var upcomingEvents = ViewBag.UpcomingEvents as List<TheBookBuffetSem2.Models.EventVenueViewModel>;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <script>
+        // Hide the alert after 3 seconds
+        setTimeout(function () {
+            $('#success-alert').alert('close');
+        }, 3000);
+    </script>
+}
+
+<section id="customer-dashboard" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Welcome to The Book Buffet</h2>
+
+        <!-- Include the survey requests partial view -->
+        @Html.Action("SurveyRequest", "Customer")
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card bg-primary text-white text-center card-hover position-relative" style="cursor: pointer;" onclick="location.href='@Url.Action("UpcomingEvents", "Event")'">
+                    <div class="card-body">
+                        <h4 style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); font-weight: bold;">Explore Book Launches</h4>
+                    </div>
+                    @if (upcomingEvents != null && upcomingEvents.Any())
+                    {
+                        <div id="eventCarousel" class="carousel slide mt-3 position-absolute w-100" data-ride="carousel" style="bottom: 0; left: 0;">
+                            <div class="carousel-inner">
+                                @for (int i = 0; i < upcomingEvents.Count; i++)
+                                {
+                                    var eventItem = upcomingEvents[i];
+                                    var isActive = i == 0 ? "active" : "";
+                                    <div class="carousel-item @isActive">
+                                        <img src="@eventItem.Venue.Photos" alt="Event Image" class="img-fluid" style="width: 100%; object-fit: cover; opacity: 0.5;">
+                                        <div class="carousel-caption d-md-block">
+                                            <p class="countdown mb-0" id="countdown_@eventItem.Event.EventId"></p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Other cards -->
+            <div class="col-md-3 mb-4">
+                <div class="card bg-secondary text-white text-center">
+                    <div class="card-body">
+                        <h5>Buy Books</h5>
+                        <p><span class="emoji">&#128679;</span> Under Construction</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card bg-secondary text-white text-center">
+                    <div class="card-body">
+                        <h5>Rent Books</h5>
+                        <p><span class="emoji">&#128679;</span> Under Construction</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card bg-info text-white text-center">
+                    <div class="card-body">
+                        <h4>Join Our Book Club</h4>
+                        <p>Engage with fellow book lovers, participate in discussions, and attend exclusive events.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card bg-success text-white text-center">
+                    <div class="card-body">
+                        <h4>Get Personalized Recommendations</h4>
+                        <p>Discover books tailored to your preferences and reading habits.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card bg-secondary text-white text-center">
+                    <div class="card-body">
+                        <h5>Book Exchanges</h5>
+                        <p><span class="emoji">&#128679;</span> Under Construction</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Replaced Author Signings Button with Maroon Color -->
+            <div class="col-md-3 mb-4">
+                <div class="card bg-secondary text-white text-center card-hover position-relative" style="background-color: #8B0000; cursor: pointer;" onclick="location.href='@Url.Action("FAQ", "Customer")'">
+                    <div class="card-body">
+                        <h5 style="position: relative;">
+                            <span class="emoji" style="font-size: 50px; position: absolute; top: -20px; left: -20px; opacity: 0.3;">🤔❓</span>
+                            Book Launch FAQs
+                        </h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card bg-warning text-dark text-center">
+                    <div class="card-body">
+                        <h4>Subscribe to Our Newsletter</h4>
+                        <p>Stay updated with the latest book launches, events, and exclusive offers.</p>
+                        <a href="#" class="btn btn-dark">Subscribe Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .card-hover:hover {
+            background-color: #0069d9;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        .card-body h4, .card-body h5 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .emoji {
+            font-size: 24px;
+        }
+
+        .card.bg-secondary .card-body {
+            padding: 20px;
+        }
+
+            .card.bg-secondary .card-body h5 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .card.bg-secondary .card-body p {
+                font-size: 14px;
+            }
+
+        .carousel-item {
+            text-align: center;
+            height: 150px; /* Height of the carousel */
+        }
+
+            .carousel-item img {
+                transition: opacity 1s ease-in-out;
+            }
+
+        .carousel-caption {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            text-align: center;
+        }
+
+        .countdown {
+            font-size: 14px;
+            color: #fff;
+        }
+
+        /* Add this */
+        .card-body h4 {
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.carousel').carousel({
+                interval: 3000, // Slide every 3 seconds
+                ride: "carousel"
+            });
+
+            @foreach (var eventItem in upcomingEvents)
+            {
+                <text>
+                    setInterval(function() {
+                        updateCountdown('@eventItem.Event.EventId', '@eventItem.Event.LaunchDate.ToString("yyyy-MM-ddTHH:mm:ss")');
+                    }, 1000);
+                </text>
+            }
+        });
+
+        function updateCountdown(eventId, launchDate) {
+            var countDownDate = new Date(launchDate).getTime();
+            var now = new Date().getTime();
+            var distance = countDownDate - now;
+
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            var countdownElement = document.getElementById("countdown_" + eventId);
+            countdownElement.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+            if (distance < 0) {
+                countdownElement.innerHTML = "Event has started!";
+            } else if (distance <= 86400000) { // 86400000 milliseconds = 24 hours
+                countdownElement.style.color = "red";
+            } else {
+                countdownElement.style.color = "";
+            }
+        }
+    </script>
+}

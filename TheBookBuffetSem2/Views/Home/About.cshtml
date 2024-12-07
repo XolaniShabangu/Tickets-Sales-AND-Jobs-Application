@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "About";
+}
+<section id="about-us" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <main aria-labelledby="title">
+            <h2 id="title" class="text-center mb-4">@ViewBag.Title</h2>
+            
+            <p class="text-center">We are a book shop, named The Book Buffet. We offer all kinds of books for sale. recently we started hosting book launches, stay tuned for those.</p>
+        </main>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        #about-us h2, #about-us h3, #about-us p {
+            color: #ecf0f1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #about-us {
+            text-align: center;
+        }
+    </style>
+}

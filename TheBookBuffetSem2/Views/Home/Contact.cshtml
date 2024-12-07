@@ -1,0 +1,56 @@
+﻿@{
+    ViewBag.Title = "Contact Us";
+}
+<section id="contact-us" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <main aria-labelledby="title" class="mt-5">
+            <h2 id="title" class="text-center mb-4">@ViewBag.Title</h2>
+            <h3 class="text-center">We'd love to hear from you!</h3>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <address>
+                        <strong>Address:</strong><br />
+                        70 Steve Biko Road<br />
+                        Durban, Berea<br />
+                        <abbr title="Phone">P:</abbr> 079 615 9156
+                    </address>
+                </div>
+                <div class="col-md-6">
+                    <address>
+                        <strong>Email:</strong><br />
+                        <a href="mailto:thebookbuffet4@gmail.com" class="text-light">thebookbuffet4@gmail.com</a>
+                    </address>
+                </div>
+            </div>
+        </main>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        #contact-us h2, #contact-us h3, #contact-us address {
+            color: #ecf0f1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        a.text-light {
+            color: #ecf0f1;
+        }
+
+            a.text-light:hover {
+                color: #ffffff;
+                text-decoration: underline;
+            }
+    </style>
+}

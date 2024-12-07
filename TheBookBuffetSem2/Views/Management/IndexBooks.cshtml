@@ -1,0 +1,30 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Book>
+
+@{
+    ViewBag.Title = "Books";
+}
+
+<h2>Books</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@book.Author.Name</td>
+                <td>
+                    <a href="@Url.Action("EditBook", "Management", new { id = book.BookID })" class="btn btn-primary">Edit</a>
+                    <a href="@Url.Action("DeleteBook", "Management", new { id = book.BookID })" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

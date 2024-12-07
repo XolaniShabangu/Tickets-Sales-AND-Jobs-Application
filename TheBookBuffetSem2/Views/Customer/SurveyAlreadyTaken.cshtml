@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "Survey Already Taken";
+}
+
+<section id="survey-already-taken" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container text-center">
+        <div class="card bg-secondary text-white" style="max-width: 500px; margin: auto; border-radius: 10px; padding: 20px;">
+            <div class="card-body">
+                <h2 class="card-title">🙌 Survey Already Taken!</h2>
+                <p class="card-text mt-4">Thank you for your participation.</p>
+                <p class="card-text">We appreciate your feedback.</p>
+                <p class="card-text mt-4">You have already submitted your responses for this survey.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 18px;
+        }
+
+        .emoji {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+    </style>
+}

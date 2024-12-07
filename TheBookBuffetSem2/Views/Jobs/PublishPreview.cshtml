@@ -1,0 +1,32 @@
+﻿@model TheBookBuffetSem2.Models.Careers.Job
+
+@{
+    ViewBag.Title = "Publish Job Preview";
+    // Pre-filled content with emoji and job information
+    string tweetContent = $"🚨We Are Hiring🚨\n\n{Model.Title}\n\n{Model.Description}\n\n✅ {Model.Qualifications}\n\nApply before: {Model.ClosingDate.ToString("d MMM yyyy")}";
+}
+
+<h2>Preview Job Post Publishing</h2>
+
+<div class="card mb-4">
+    <div class="card-header" style="background-color: #1e3a8a; color: white;">
+        <h5>@Model.Title</h5>
+        <small>Preview of Social Media Post</small>
+    </div>
+    <div class="card-body">
+        <form action="@Url.Action("PostToFacebook", "Jobs", new { id = Model.JobId })" method="post">
+            <div class="form-group">
+                <label for="tweetContent">Post Content</label>
+                <textarea id="tweetContent" name="tweetContent" class="form-control" rows="6">@tweetContent</textarea>
+            </div>
+
+            <div class="text-center">
+                <!-- Placeholder for the dynamically generated image -->
+                <img src="@ViewBag.ImagePath" alt="We are Hiring" class="img-fluid" style="max-width: 400px; width: 100%; height: auto;">
+                <!-- Job title is dynamically drawn on the image in the controller -->
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4">Publish</button>
+        </form>
+    </div>
+</div>

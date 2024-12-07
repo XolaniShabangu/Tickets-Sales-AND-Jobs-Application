@@ -1,0 +1,36 @@
+﻿@model TheBookBuffetSem2.Models.Careers.Applicant
+
+<div class="container text-center pt-5">
+    <h2>Processing Your Application...</h2>
+    <p>Please wait while we analyze your documents.</p>
+    <div class="loading-spinner">
+        <img src="~/images/loading-spinner.gif" alt="Loading" />
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        console.log("Starting OCR process for applicantId: @Model.ApplicantId");
+
+        // Trigger the StartOCR action
+        $.ajax({
+            url: '@Url.Action("StartOCR", "Jobs", new { applicantId = Model.ApplicantId })',
+            type: 'POST',
+            success: function (response) {
+                console.log("OCR process completed successfully", response);
+
+                if (response.success) {
+                    // Redirect to results page if OCR succeeded
+                    window.location.href = '@Url.Action("OCRResults", "Jobs", new { applicantId = Model.ApplicantId })';
+                } else {
+                    // Redirect to failure page if OCR failed
+                    window.location.href = '@Url.Action("ApplicationFailed", "Jobs", new { applicantId = Model.ApplicantId })';
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log("Error in OCR process: ", error);
+                window.location.href = '@Url.Action("ApplicationFailed", "Jobs", new { applicantId = Model.ApplicantId })';
+            }
+        });
+    });
+</script>

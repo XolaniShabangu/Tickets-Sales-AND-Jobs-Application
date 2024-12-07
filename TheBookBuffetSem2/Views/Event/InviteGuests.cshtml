@@ -1,0 +1,178 @@
+﻿@model TheBookBuffetSem2.Models.InviteGuestsViewModel
+
+<!-- Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<section id="invite-authors" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container text-center">
+        <h2 class="text-center mb-4">Invite Authors for @Model.EventTitle</h2>
+
+        @using (Html.BeginForm("SendInvitations", "Event", FormMethod.Post, new { @class = "d-flex flex-column align-items-center" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.EventId)
+
+            <div class="form-group col-md-6">
+                <label for="authorSearch" class="text-light">Search Authors</label>
+                <input type="text" id="authorSearch" class="form-control bg-dark text-light border-secondary" placeholder="Search by name...">
+            </div>
+
+            <div class="form-group col-md-6 d-flex align-items-center">
+                <input type="checkbox" id="selectAll" />
+                <label for="selectAll" class="text-light ml-2">Select All</label>
+            </div>
+
+            <div class="form-group col-md-8" style="overflow-x: auto; white-space: nowrap;" id="authorList">
+                @for (int i = 0; i < Model.Authors.Count; i++)
+                {
+                    <label class="author-item" style="display: inline-block; margin-right: 15px; color: #ecf0f1;">
+                        @Html.CheckBoxFor(m => m.Authors[i].IsSelected)
+                        @Html.HiddenFor(m => m.Authors[i].AuthorID)
+                        @Html.HiddenFor(m => m.Authors[i].Email)
+                        @Html.HiddenFor(m => m.Authors[i].Name)
+                        <span>@Model.Authors[i].Name</span>
+                    </label>
+                }
+            </div>
+
+            <div class="form-group col-md-8">
+                <label for="InvitationMessage" class="text-light">Invitation Message</label>
+                @Html.TextAreaFor(m => m.InvitationMessage, new { @class = "form-control bg-dark text-light border-secondary", rows = 7 })
+            </div>
+
+            <div class="form-group col-md-8">
+                <button type="submit" class="btn btn-primary btn-block">Send Invitations</button>
+            </div>
+        }
+
+        <!-- Collapsible section to add new authors -->
+        <div class="form-group col-md-8">
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-link text-light" type="button" data-toggle="collapse" data-target="#collapseNewAuthor" aria-expanded="false" aria-controls="collapseNewAuthor">
+                    &#x25BC; Add New
+                </button>
+            </div>
+            <div class="collapse" id="collapseNewAuthor">
+                @using (Html.BeginForm("CreateAuthor", "Event", FormMethod.Post, new { @class = "d-flex flex-column align-items-center" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("eventId", Model.EventId)
+
+                    <div class="form-group col-md-8">
+                        <label for="newAuthorName" class="text-light">Author Name</label>
+                        @Html.TextBox("Name", null, new { @class = "form-control bg-dark text-light border-secondary", id = "newAuthorName" })
+                    </div>
+                    <div class="form-group col-md-8">
+                        <label for="newAuthorEmail" class="text-light">Author Email</label>
+                        @Html.TextBox("Email", null, new { @class = "form-control bg-dark text-light border-secondary", id = "newAuthorEmail", @type = "email", @pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$", @title = "Please enter a valid email address." })
+                    </div>
+                    <div class="form-group col-md-8">
+                        <button type="submit" class="btn btn-success btn-block">Save Author</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .form-control {
+            background-color: #343a40;
+            color: #ecf0f1;
+            border: 1px solid #495057;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .author-item {
+            display: inline-block;
+            margin-right: 15px;
+            color: #ecf0f1;
+            text-align: center;
+        }
+
+        .form-group label {
+            display: block;
+            text-align: center;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .collapse {
+            margin-top: 20px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #3c3c3c;
+        }
+
+        .card-header {
+            border-bottom: none;
+            background-color: #495057;
+            color: #ffffff;
+        }
+
+        .card-footer {
+            border-top: none;
+            padding-top: 10px;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById("selectAll").addEventListener("change", function () {
+            var checkboxes = document.querySelectorAll(".author-item input[type='checkbox']");
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = this.checked;
+            }
+        });
+
+        document.getElementById("authorSearch").addEventListener("keyup", function () {
+            var searchText = this.value.toLowerCase();
+            var authors = document.querySelectorAll(".author-item");
+            authors.forEach(function (author) {
+                var name = author.textContent.toLowerCase();
+                if (name.includes(searchText)) {
+                    author.style.display = "inline-block";
+                } else {
+                    author.style.display = "none";
+                }
+            });
+        });
+    </script>
+}

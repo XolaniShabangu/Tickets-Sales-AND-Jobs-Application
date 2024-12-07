@@ -1,0 +1,131 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Event>
+
+<section id="select-event" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Select Event for QR Code Scanning</h2>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-warning text-center">
+                No events are happening today.
+            </div>
+        }
+        else
+        {
+            var now = DateTime.Now;
+            var ongoingEvents = Model.Where(e => e.LaunchDate <= now && e.LaunchDate.AddMinutes(10) > now).ToList();
+            var upcomingEvents = Model.Where(e => e.LaunchDate > now).ToList();
+            var pastEvents = Model.Where(e => e.LaunchDate.AddMinutes(10) <= now && e.LaunchDate.AddHours(2) >= now).ToList(); // Events that are late but within the last 2 hours
+
+            // Find the event closest to the current time (for pulsing)
+            var closestEvent = ongoingEvents
+                .Concat(upcomingEvents)
+                .OrderBy(e => Math.Abs((e.LaunchDate - now).TotalMinutes))
+                .FirstOrDefault();
+
+            if (ongoingEvents.Any() || upcomingEvents.Any())
+            {
+                <div class="row">
+                    <!-- Ongoing and Upcoming Events -->
+                    <div class="col-12">
+                        <h3>Ongoing and Upcoming Events</h3>
+                        <div class="row mb-4">
+                            @foreach (var eventItem in ongoingEvents.Concat(upcomingEvents))
+                            {
+                                var isClosest = eventItem.EventId == closestEvent?.EventId;
+                                <div class="col-md-4">
+                                    <div class="card mb-4 text-center event-card @(isClosest ? "pulse" : "")" style="cursor: pointer;" onclick="window.location='@Url.Action("ScanTickets", "Attendance", new { eventId = eventItem.EventId })';">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@eventItem.BookTitle</h5>
+                                            <p class="card-text">
+                                                <strong>Author:</strong> @eventItem.Author <br />
+                                                <strong>Launch Date:</strong> @eventItem.LaunchDate.ToString("f") <br />
+                                                @*<strong>Venue:</strong> @eventItem.Venue?.Name ?? "TBD"*@
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            if (pastEvents.Any())
+            {
+                <div class="row">
+                    <!-- Past Events -->
+                    <div class="col-12">
+                        <h3>Scan Late Comers (Past Events)</h3>
+                        <div class="row">
+                            @foreach (var eventItem in pastEvents)
+                            {
+                                <div class="col-md-4">
+                                    <div class="card mb-4 text-center event-card past-event" style="cursor: pointer;" onclick="window.location='@Url.Action("ScanTickets", "Attendance", new { eventId = eventItem.EventId })';">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@eventItem.BookTitle</h5>
+                                            <p class="card-text">
+                                                <strong>Author:</strong> @eventItem.Author <br />
+                                                <strong>Launch Date:</strong> @eventItem.LaunchDate.ToString("f") <br />
+                                                <strong>Venue:</strong> @eventItem.Venue?.Name ?? "TBD"
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: #333; /* Darker text color for readability */
+        }
+
+        .card-title, .card-text {
+            color: #333; /* Set a dark color for text */
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+            border: 2px solid #28a745; /* Optional border to highlight */
+        }
+
+        @@keyframes pulse {
+            0% {
+                box-shadow: 0 0 5px rgba(40, 167, 69, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(40, 167, 69, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(40, 167, 69, 0.4);
+            }
+        }
+
+        .past-event {
+            opacity: 0.5; /* Fades the entire card */
+            background-color: #7f8c8d; /* Grayish color for past events */
+        }
+    </style>
+}

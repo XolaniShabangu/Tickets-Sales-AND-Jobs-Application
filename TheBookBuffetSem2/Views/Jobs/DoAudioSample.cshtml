@@ -1,0 +1,211 @@
+﻿@{
+    ViewBag.Title = "Do Audio Sample";
+}
+
+<div id="audio-recorder" class="container pt-5 pb-5">
+    <h2 class="text-center mb-4" style="color: #1e3a8a;">Read the paragraph below:</h2>
+    <p id="paragraph" class="text-center" style="font-size: 1.2rem; color: #4a90e2; background-color: #f0f8ff; padding: 15px; border-radius: 8px;">
+        @ViewBag.TextToRead
+    </p>
+
+    <div class="text-center mt-4">
+        <button id="mic-btn" class="btn btn-primary" style="background-color: #1e3a8a; border-color: #1e3a8a; font-size: 1.2rem;">🎤 Press to Record</button>
+        <canvas id="waveform" class="mt-3" style="display: none;"></canvas> <!-- Volume Meter -->
+        <div id="timer" class="mt-2" style="font-size: 1.5rem; color: #1e3a8a;">00:00</div>
+    </div>
+
+    <div class="text-center mt-4">
+        <audio id="audio-playback" controls class="mt-3" style="width: 100%; max-width: 500px; display: none;"></audio>
+        <button id="retry-btn" class="btn btn-warning mt-3" disabled style="display: none;">Retry</button>
+    </div>
+
+    <form id="submit-audio" action="/Jobs/SubmitAudioSample" method="post" enctype="multipart/form-data" style="display:none;" class="mt-4">
+        <input type="hidden" name="applicantId" value="@ViewBag.ApplicantId" />
+        <input type="hidden" name="retryCount" id="retryCount" value="0" />
+        <input type="file" name="audioFile" id="audioFile" style="display:none;" />
+        <button type="submit" class="btn btn-success mt-3" style="background-color: #28a745; border-color: #28a745; font-size: 1.1rem;">Submit Audio</button>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        let micButton = document.getElementById('mic-btn');
+        let retryButton = document.getElementById('retry-btn');
+        let audioPlayback = document.getElementById('audio-playback');
+        let timer = document.getElementById('timer');
+        let submitForm = document.getElementById('submit-audio');
+        let mediaRecorder;
+        let audioContext;
+        let audioStream;
+        let audioChunks = [];
+        let retryCount = 0;
+        let startTime, intervalId;
+
+        micButton.addEventListener('click', async function () {
+            if (micButton.textContent === '🎤 Press to Record') {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+
+        retryButton.addEventListener('click', function () {
+            retryRecording();
+        });
+
+        // Start recording with the microphone
+        async function startRecording() {
+            try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('Microphone access granted.');
+
+                // Initialize AudioContext to process the audio
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                let input = audioContext.createMediaStreamSource(audioStream);
+                let recorder = audioContext.createScriptProcessor(2048, 1, 1);
+
+                // Capture audio data in chunks
+                recorder.onaudioprocess = function (e) {
+                    let leftChannel = e.inputBuffer.getChannelData(0);
+                    audioChunks.push(new Float32Array(leftChannel));
+                };
+
+                input.connect(recorder);
+                recorder.connect(audioContext.destination);
+                micButton.textContent = '⏸ Stop Recording';
+                retryButton.disabled = true;
+                retryButton.style.display = 'none';
+
+                startTimer();
+
+                // When stopping the recording
+                recorder.disconnect = function () {
+                    let wavBlob = encodeWav(audioChunks);
+                    audioPlayback.src = URL.createObjectURL(wavBlob);
+                    audioPlayback.style.display = 'block';
+                    retryButton.style.display = 'inline-block';
+
+                    // Save the WAV Blob as an audio file
+                    const audioFileInput = document.getElementById('audioFile');
+                    const file = new File([wavBlob], 'audio.wav', { type: 'audio/wav' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    audioFileInput.files = dataTransfer.files;
+
+                    submitForm.style.display = 'block';
+                    retryButton.disabled = false;
+                    micButton.textContent = '🎤 Press to Record';
+                    console.log('Recording stopped, audio file ready for submission.');
+                };
+
+                // Store recorder in a variable to stop it later
+                mediaRecorder = recorder;
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                alert('Microphone access is required to record audio.');
+            }
+        }
+
+        // Stop the recording and disconnect the stream
+        function stopRecording() {
+            if (mediaRecorder) {
+                mediaRecorder.disconnect();
+                audioContext.close();
+            }
+            stopTimer();
+        }
+
+        // Retry logic
+        function retryRecording() {
+            retryCount++;
+            document.getElementById('retryCount').value = retryCount;
+
+            // Reset the UI
+            retryButton.disabled = true;
+            micButton.textContent = '🎤 Press to Record';
+            submitForm.style.display = 'none';
+            audioPlayback.style.display = 'none';
+            audioPlayback.src = "";
+            audioChunks = [];
+            timer.textContent = "00:00";
+            stopTimer();
+
+            console.log('Retry triggered, count: ' + retryCount);
+        }
+
+        // Timer functionality
+        function startTimer() {
+            startTime = Date.now();
+            intervalId = setInterval(function () {
+                let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                let minutes = Math.floor(elapsedTime / 60);
+                let seconds = elapsedTime % 60;
+                timer.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }, 1000);
+            console.log('Timer started.');
+        }
+
+        function stopTimer() {
+            clearInterval(intervalId);
+            console.log('Timer stopped.');
+        }
+
+        // WAV encoding
+        function encodeWav(samples) {
+            let buffer = mergeBuffers(samples);
+            let wavBlob = createWavBlob(buffer, audioContext.sampleRate);
+            return wavBlob;
+        }
+
+        // Merge audio chunks into a single buffer
+        function mergeBuffers(chunks) {
+            let totalLength = chunks.reduce((acc, val) => acc + val.length, 0);
+            let mergedBuffer = new Float32Array(totalLength);
+            let offset = 0;
+            for (let chunk of chunks) {
+                mergedBuffer.set(chunk, offset);
+                offset += chunk.length;
+            }
+            return mergedBuffer;
+        }
+
+        // Create WAV Blob with correct headers
+        function createWavBlob(buffer, sampleRate) {
+            let wavBuffer = new ArrayBuffer(44 + buffer.length * 2);
+            let view = new DataView(wavBuffer);
+
+            // RIFF identifier
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + buffer.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);  // PCM format
+            view.setUint16(22, 1, true);  // Mono
+            view.setUint32(24, sampleRate, true);  // Sample rate
+            view.setUint32(28, sampleRate * 2, true);  // Byte rate (sample rate * block align)
+            view.setUint16(32, 2, true);  // Block align
+            view.setUint16(34, 16, true);  // Bits per sample
+            writeString(view, 36, 'data');
+            view.setUint32(40, buffer.length * 2, true);
+
+            // Write PCM data
+            let offset = 44;
+            for (let i = 0; i < buffer.length; i++) {
+                let sample = buffer[i] * 0x7fff;  // Convert float to PCM
+                view.setInt16(offset, sample, true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        // Helper function to write strings to the DataView
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+    </script>
+
+}

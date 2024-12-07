@@ -1,0 +1,230 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.Careers.Job>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="success-message" class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@{
+    ViewBag.Title = "Job Listings";
+    bool hasPublishedJobs = false;
+    bool hasDraftJobs = false;
+}
+
+<section id="job-listings" class="pt-5 pb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Job Listings</h2>
+
+        <!-- Sorting Buttons -->
+        <div class="d-flex justify-content-between mb-4">
+            <div>
+                <a href="@Url.Action("Index", new { sortOrder = ViewBag.TitleSortParam })" class="btn btn-outline-dark">Sort by Title</a>
+                <a href="@Url.Action("Index", new { sortOrder = ViewBag.DateSortParam })" class="btn btn-outline-dark">Sort by Closing Date</a>
+                <a href="@Url.Action("Index", new { sortOrder = ViewBag.CreatedSortParam })" class="btn btn-outline-dark">Sort by Created Date</a>
+            </div>
+        </div>
+
+        <!-- Search by Job Title -->
+        <form class="mb-4">
+            <div class="form-row d-flex align-items-end">
+                <div class="form-group col-md-3">
+                    <label for="searchTitle" class="text-dark">Search by Job Title</label>
+                    <input type="text" id="searchTitle" class="form-control border-secondary" placeholder="Enter job title" />
+                </div>
+            </div>
+        </form>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">No jobs found.</div>
+        }
+        else
+        {
+            <div id="jobsContainer">
+
+                <!-- Published Jobs Section -->
+                @foreach (var item in Model.Where(j => j.Published))
+                {
+                    if (!hasPublishedJobs)
+                    {
+                        hasPublishedJobs = true;
+                        <div class="col-12 my-4">
+                            <h4 class="text-center text-muted">Published Jobs</h4>
+                        </div>
+                    }
+
+                    <div class="card mb-4 bg-light text-dark job-card">
+                        <div class="card-header" style="background-color: #1e3a8a; color: white;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0" style="font-weight: bold;">@item.Title</h5>
+                                    <small class="text-light">Closing Date: @item.ClosingDate.ToString("f")</small>
+                                </div>
+                                <span class="badge badge-published">Published</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> @item.Description</p>
+                            <p><strong>Qualifications:</strong> @item.Qualifications</p>
+                            <p><strong>OCR Keywords:</strong> @item.OcrKeywords</p>
+                        </div>
+                        <div class="card-footer" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white;">
+                            <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="btn btn-light">View Details</a>
+                            <a href="@Url.Action("Track", "Jobs", new { id = item.JobId })" class="btn btn-info">Track Applicants</a>
+                        </div>
+                    </div>
+                }
+
+                <!-- Draft Jobs Section -->
+                @foreach (var item in Model.Where(j => !j.Published))
+                {
+                    if (!hasDraftJobs)
+                    {
+                        hasDraftJobs = true;
+                        <div class="col-12 my-4">
+                            <h4 class="text-center text-muted">Draft Jobs</h4>
+                        </div>
+                    }
+
+                    <div class="card mb-4 bg-light text-dark job-card">
+                        <div class="card-header" style="background-color: #1e3a8a; color: white;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0" style="font-weight: bold;">@item.Title</h5>
+                                    <small class="text-light">Closing Date: @item.ClosingDate.ToString("f")</small>
+                                </div>
+                                <span class="badge badge-secondary">Draft</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> @item.Description</p>
+                            <p><strong>Qualifications:</strong> @item.Qualifications</p>
+                            <p><strong>OCR Keywords:</strong> @item.OcrKeywords</p>
+                        </div>
+                        <div class="card-footer" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white;">
+                            <a href="@Url.Action("Details", "Jobs", new { id = item.JobId })" class="btn btn-light">View Details</a>
+                            <a href="@Url.Action("Edit", "Jobs", new { id = item.JobId })" class="btn btn-outline-light">Edit</a>
+                            <a href="@Url.Action("Delete", "Jobs", new { id = item.JobId })" class="btn btn-warning">Delete</a>
+                            <a href="@Url.Action("Publish", "Jobs", new { id = item.JobId })" class="btn btn-success">Publish</a>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        }
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        .form-control {
+            background-color: #ffffff;
+            color: #343a40;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-outline-light {
+            border-color: #ffffff;
+            color: #ffffff;
+        }
+
+        .btn-light {
+            background-color: #ffffff;
+            color: #343a40;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+        }
+
+        .card-header {
+            border-bottom: none;
+            background-color: #1e3a8a;
+            color: white;
+        }
+
+        .card-footer {
+            border-top: none;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding-top: 10px;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+        }
+
+        /* Styles for Published Badge */
+        .badge-published {
+            background-color: #ffd700; /* Bright yellow */
+            color: #343a40;
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 20px 20px rgba(255, 215, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // JavaScript search functionality for filtering jobs by title
+        document.getElementById('searchTitle').addEventListener('keyup', function () {
+            let searchValue = this.value.toLowerCase();
+            let cards = document.querySelectorAll('.job-card');
+
+            cards.forEach(card => {
+                let title = card.querySelector('h5').textContent.toLowerCase();
+                if (title.includes(searchValue)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Hide the success message after 5 seconds
+        setTimeout(function () {
+            var successMessage = document.getElementById("success-message");
+            if (successMessage) {
+                successMessage.style.display = "none";
+                successMessage.style.transition = "opacity 1s";
+                successMessage.style.opacity = "0";
+            }
+        }, 5000);
+    </script>
+}

@@ -1,0 +1,173 @@
+﻿@model TheBookBuffetSem2.Models.TicketManagementViewModel
+
+<section id="manage-tickets" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Manage Ticket Price and Count for @Model.EventName</h2>
+
+        <p class="text-center">Total Venue Capacity: @Model.VenueCapacity</p>
+
+        <form asp-action="CreateTickets" method="post" onsubmit="return validateAndAlert()">
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(m => m.VenueCapacity)  <!-- Hidden field to pass VenueCapacity -->
+            <!-- Display a summary of all validation errors -->
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="form-group row">
+                <label for="generalPrice" class="col-sm-4 col-form-label">General Admission Price:</label>
+                <div class="col-sm-8">
+                    <input type="number" id="generalPrice" name="GeneralPrice" class="form-control" value="@Model.GeneralPrice" step="0.01" />
+                    @Html.ValidationMessageFor(m => m.GeneralPrice, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row align-items-center">
+                <label for="generalTickets" class="col-sm-4 col-form-label">General Admission Tickets:</label>
+                <div class="col-sm-6">
+                    <input type="range" id="generalTicketsSlider" name="GeneralTickets" class="form-control-range" min="0" max="@Model.VenueCapacity" value="@Model.GeneralTickets"
+                           oninput="updateTicketCount('generalTicketsSlider', 'generalTicketsNumber')" />
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" id="generalTicketsNumber" name="GeneralTicketsNumber" class="form-control form-control-sm" min="0" max="@Model.VenueCapacity" value="@Model.GeneralTickets"
+                           oninput="updateTicketSlider('generalTicketsSlider', 'generalTicketsNumber')" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="vipPrice" class="col-sm-4 col-form-label">VIP Price:</label>
+                <div class="col-sm-8">
+                    <input type="number" id="vipPrice" name="VIPPrice" class="form-control" value="@Model.VIPPrice" step="0.01" />
+                    @Html.ValidationMessageFor(m => m.VIPPrice, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row align-items-center">
+                <label for="vipTickets" class="col-sm-4 col-form-label">VIP Tickets:</label>
+                <div class="col-sm-6">
+                    <input type="range" id="vipTicketsSlider" name="VIPTickets" class="form-control-range" min="0" max="@Model.VenueCapacity" value="@Model.VIPTickets"
+                           oninput="updateTicketCount('vipTicketsSlider', 'vipTicketsNumber')" />
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" id="vipTicketsNumber" name="VIPTicketsNumber" class="form-control form-control-sm" min="0" max="@Model.VenueCapacity" value="@Model.VIPTickets"
+                           oninput="updateTicketSlider('vipTicketsSlider', 'vipTicketsNumber')" />
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="vvipPrice" class="col-sm-4 col-form-label">VVIP Price:</label>
+                <div class="col-sm-8">
+                    <input type="number" id="vvipPrice" name="VVIPPrice" class="form-control" value="@Model.VVIPPrice" step="0.01" />
+                    @Html.ValidationMessageFor(m => m.VVIPPrice, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row align-items-center">
+                <label for="vvipTickets" class="col-sm-4 col-form-label">VVIP Tickets:</label>
+                <div class="col-sm-6">
+                    <input type="range" id="vvipTicketsSlider" name="VVIPTickets" class="form-control-range" min="0" max="@Model.VenueCapacity" value="@Model.VVIPTickets"
+                           oninput="updateTicketCount('vvipTicketsSlider', 'vvipTicketsNumber')" />
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" id="vvipTicketsNumber" name="VVIPTicketsNumber" class="form-control form-control-sm" min="0" max="@Model.VenueCapacity" value="@Model.VVIPTickets"
+                           oninput="updateTicketSlider('vvipTicketsSlider', 'vvipTicketsNumber')" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <p>Total Tickets Allocated: <span id="totalTickets">@Model.TotalTickets</span></p>
+                <p>Remaining Capacity: <span id="remainingCapacity">@Model.RemainingCapacity</span></p>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Ticket Configuration</button>
+        </form>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .form-control {
+            background-color: #343a40;
+            color: #ecf0f1;
+            border: 1px solid #495057;
+        }
+
+        .form-control-range {
+            width: 100%;
+        }
+
+        .form-control-sm {
+            width: 80px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .text-danger {
+            color: #e74c3c !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function updateTicketCount(sliderId, numberId) {
+            var slider = document.getElementById(sliderId);
+            var number = document.getElementById(numberId);
+            number.value = slider.value;
+            updateTotalTickets();
+        }
+
+        function updateTicketSlider(sliderId, numberId) {
+            var slider = document.getElementById(sliderId);
+            var number = document.getElementById(numberId);
+            slider.value = number.value;
+            updateTotalTickets();
+        }
+
+        function updateTotalTickets() {
+            var generalTickets = parseInt(document.getElementById("generalTicketsNumber").value) || 0;
+            var vipTickets = parseInt(document.getElementById("vipTicketsNumber").value) || 0;
+            var vvipTickets = parseInt(document.getElementById("vvipTicketsNumber").value) || 0;
+
+            var totalTickets = generalTickets + vipTickets + vvipTickets;
+            var remainingCapacity = @Model.VenueCapacity - totalTickets;
+
+            document.getElementById("totalTickets").innerText = totalTickets;
+            document.getElementById("remainingCapacity").innerText = remainingCapacity;
+        }
+
+        function validateAndAlert() {
+            var remainingCapacity = parseInt(document.getElementById("remainingCapacity").innerText);
+
+            if (remainingCapacity < 0) {
+                alert("The number of tickets exceeds the total capacity. Please adjust the ticket numbers.");
+                return false; // Prevent form submission
+            }
+
+            if (remainingCapacity > 0) {
+                var confirmMessage = "The number of tickets is under the venue capacity. Are you okay with this?";
+                var isConfirmed = confirm(confirmMessage);
+
+                if (!isConfirmed) {
+                    return false; // Prevent form submission if the admin clicks "Cancel"
+                }
+            }
+
+            // Show success alert
+            alert("Tickets have been published..");
+
+            return true; // Allow the form to be submitted
+        }
+
+
+    </script>
+}

@@ -1,0 +1,256 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.EventReminderViewModel>
+
+@{
+    ViewBag.Title = "Manage Event Reminders";
+}
+
+<section id="manage-reminders" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Manage Reminders</h2>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="row">
+                @foreach (var eventItem in Model)
+                {
+                    if (eventItem.LaunchDate > DateTime.Now)
+                    {
+                        <div class="col-md-6 mb-4">
+                            <div class="card bg-secondary text-white position-relative">
+                                <div class="card-body">
+                                    <h4>@eventItem.BookTitle</h4>
+                                    <p><strong>Date:</strong> @eventItem.LaunchDate.ToString("f")</p>
+                                    <p class="countdown" id="countdown_@eventItem.EventId"></p>
+
+                                    <div class="d-flex justify-content-end">
+                                        <!-- Hide or Disable Buttons if Reminders Sent or Scheduled -->
+                                        @if (!eventItem.RemindersSent && !eventItem.ReminderScheduled)
+                                        {
+                                            <button class="btn btn-primary me-2"
+                                                    onclick="sendReminderNow(@eventItem.EventId)">
+                                                Send Reminder Now
+                                            </button>
+
+                                            <div class="mt-3">
+                                                <label for="timeInput_@eventItem.EventId">Schedule Reminder in:</label>
+                                                <div class="input-group">
+                                                    <input type="number" id="timeInput_@eventItem.EventId" class="form-control" placeholder="Enter number">
+                                                    <select id="timeUnit_@eventItem.EventId" class="form-control">
+                                                        <option value="minutes">Minutes</option>
+                                                        <option value="hours">Hours</option>
+                                                    </select>
+                                                    <button class="btn btn-warning mt-2"
+                                                            onclick="scheduleReminder(@eventItem.EventId)">
+                                                        Schedule Reminder
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                        else if (eventItem.ReminderScheduled) // Show Cancel button if reminder is scheduled
+                                        {
+                                            <button class="btn btn-danger mt-2"
+                                                    onclick="cancelScheduledReminder(@eventItem.EventId)">
+                                                Cancel Reminder
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+
+                                @if (eventItem.RemindersSent)
+                                {
+                                    <div class="reminder-banner text-center">
+                                        <h1>REMINDERS SENT</h1>
+                                    </div>
+                                    <p class="text-center text-danger font-weight-bold mt-2">Reminder Sent</p>
+                                }
+                                else if (eventItem.ReminderScheduled)
+                                {
+                                    <div class="reminder-banner text-center bg-warning text-dark">
+                                        <h1>REMINDER SCHEDULED</h1>
+                                    </div>
+                                    <p class="text-center text-warning font-weight-bold mt-2">Reminder Scheduled</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <p>No upcoming events found within the next 2 days.</p>
+        }
+    </div>
+</section>
+
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: #333; /* Darker text color for readability */
+            position: relative;
+        }
+
+        .card-title, .card-text, .list-group-item {
+            color: #333; /* Set a dark color for text */
+        }
+
+        .reminder-banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            background-color: #28a745;
+            color: white;
+            padding: 20px 0;
+            font-weight: bold;
+            z-index: 10;
+            text-transform: uppercase;
+            font-size: 2.5rem;
+            opacity: 0.9;
+            transform: translate(-50%, -50%) rotate(-26deg);
+            text-align: center;
+        }
+
+        .card {
+            overflow: hidden; /* Ensure the banner doesn't overflow the card */
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .countdown {
+            font-size: 1.2em;
+            color: #ff4757;
+            margin-top: 10px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function sendReminderNow(eventId) {
+            $.ajax({
+                url: '@Url.Action("SendReminderNow", "Event")',
+                type: 'POST',
+                data: { eventId: eventId },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload(); // Refresh the page to show the banner
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                }
+            });
+        }
+
+        function scheduleReminder(eventId) {
+            var timeValue = document.getElementById('timeInput_' + eventId).value;
+            var timeUnit = document.getElementById('timeUnit_' + eventId).value;
+
+            if (!timeValue || timeValue <= 0) {
+               alert('Please enter a valid time.');
+               return;
+             }
+
+            var scheduledTime = new Date();
+            if (timeUnit === 'minutes') {
+                scheduledTime.setMinutes(scheduledTime.getMinutes() + parseInt(timeValue));
+            } else {
+                  scheduledTime.setHours(scheduledTime.getHours() + parseInt(timeValue));
+            }
+
+            $.ajax({
+                url: '@Url.Action("ScheduleReminder", "Event")',
+                type: 'POST',
+                data: { eventId: eventId, scheduledTime: scheduledTime.toISOString() },
+                success: function (response) {
+                   if (response.success) {
+                       alert(response.message);
+                       location.reload(); // Refresh the page to show the banner
+                   } else {
+                      alert('Error: ' + response.message);
+                   }
+                }
+            });
+        }
+
+        function cancelScheduledReminder(eventId) {
+            if (confirm("Are you sure you want to cancel the scheduled reminder?")) {
+                $.ajax({
+                    url: '@Url.Action("CancelScheduledReminder", "Event")',
+                    type: 'POST',
+                    data: { eventId: eventId },
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload(); // Refresh the page to show the updated status
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    }
+                });
+            }
+        }
+
+        $(document).ready(function () {
+            @foreach (var eventItem in Model)
+            {
+                <text>
+                    setInterval(function () {
+                        updateCountdown('@eventItem.EventId', '@eventItem.LaunchDate.ToString("yyyy-MM-ddTHH:mm:ss")');
+                    }, 1000);
+                </text>
+            }
+        });
+
+        function updateCountdown(eventId, launchDate) {
+            var countDownDate = new Date(launchDate).getTime();
+            var now = new Date().getTime();
+            var distance = countDownDate - now;
+
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            var countdownElement = document.getElementById("countdown_" + eventId);
+            countdownElement.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+            if (distance < 0) {
+                countdownElement.innerHTML = "Event has started!";
+            } else if (distance <= 86400000) { // 86400000 milliseconds = 24 hours
+                countdownElement.style.color = "red";
+            } else {
+                countdownElement.style.color = ""; // Reset to default if more than 24 hours
+            }
+        }
+    </script>
+}

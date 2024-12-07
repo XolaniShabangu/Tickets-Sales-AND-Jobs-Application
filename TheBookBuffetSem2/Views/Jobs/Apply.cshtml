@@ -1,0 +1,181 @@
+﻿@model TheBookBuffetSem2.Models.Careers.Applicant
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="overlay">
+    <div class="overlay-content">
+        <img src="https://appdev3project.blob.core.windows.net/other/828pic.gif" alt="Loading" />
+        <p>Processing your application, please wait...</p>
+    </div>
+</div>
+
+<div class="container pt-5 pb-5">
+    <h2 class="text-center mb-4" style="color: #1e3a8a;">
+        Apply for @(Model.Job != null ? Model.Job.Title : "Unknown Job")
+    </h2>
+
+    <form action="/Jobs/SubmitApplication" enctype="multipart/form-data" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <!-- Left side (Personal information) -->
+            <div class="col-md-6">
+                <h4 style="color: #1e3a8a;">Personal Information</h4>
+
+                <input type="hidden" name="JobId" value="@Model.JobId" />
+
+                <div class="form-group mb-4">
+                    <label for="FullName">Full Name</label>
+                    <input type="text" value="@Model.FullName" name="FullName" class="form-control" readonly />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="IDNumber">ID Number</label>
+                    <input asp-for="IDNumber" class="form-control" id="idNumberInput" name="IDNumber" />
+                    <span asp-validation-for="IDNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="Gender">Gender</label>
+                    <input asp-for="Gender" class="form-control" id="genderField" name="Gender" readonly />
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="Email">Email</label>
+                    <input type="email" value="@Model.Email" name="Email" class="form-control" readonly />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="MobileNumber">Mobile Number</label>
+                    <input type="tel" value="@Model.MobileNumber" name="MobileNumber" class="form-control" />
+                    <span asp-validation-for="MobileNumber" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Right side (File uploads and extra information) -->
+            <div class="col-md-6">
+                <h4 style="color: #1e3a8a;">File Uploads</h4>
+
+                <div class="form-group mb-4">
+                    <label for="CVBlobUrl">CV (PDF, max 4MB)</label>
+                    <input type="file" name="CV" class="form-control-file form-control" required />
+                    <span asp-validation-for="CV" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="IDBlobUrl">ID Document (PDF, max 4MB)</label>
+                    <input type="file" name="IDDocument" class="form-control-file form-control" required />
+                    <span asp-validation-for="IDDocument" class="text-danger"></span>
+                </div>
+
+                <h4 class="mt-5" style="color: #1e3a8a;">Optional Documents</h4>
+
+                <div class="form-group mb-4">
+                    <label for="ExtraDocumentBlobUrl">Extra Document (Optional)</label>
+                    <input type="file" name="ExtraDocument" class="form-control-file form-control" />
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="ExtraDocumentDescription">Describe Extra Document (Optional)</label>
+                    <input asp-for="ExtraDocumentDescription" class="form-control" />
+                    <span asp-validation-for="ExtraDocumentDescription" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary mt-4" style="background-color: #1e3a8a; border-color: #1e3a8a;">Submit Application</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Show the loading overlay when the form is submitted
+        $(document).ready(function () {
+            $('form').on('submit', function () {
+                $('#loadingOverlay').fadeIn();  // Show the overlay
+            });
+        });
+
+        // Auto-fill the gender based on the 7th to 10th digits of the ID number
+        document.getElementById('idNumberInput').addEventListener('input', function () {
+            const idNumber = this.value;
+
+            if (idNumber.length === 13) {
+                const genderCode = parseInt(idNumber.substr(6, 4)); // Extract digits 7-10
+
+                if (genderCode >= 0 && genderCode <= 4999) {
+                    document.getElementById('genderField').value = 'Female';
+                } else if (genderCode >= 5000 && genderCode <= 9999) {
+                    document.getElementById('genderField').value = 'Male';
+                } else {
+                    document.getElementById('genderField').value = ''; // Reset if invalid
+                }
+            } else {
+                document.getElementById('genderField').value = ''; // Reset if incomplete
+            }
+        });
+    </script>
+}
+
+<!-- CSS for the loading overlay -->
+<style>
+    /* Full-screen overlay */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: none; /* Hidden by default */
+    }
+
+    /* Centered loading content */
+    .overlay-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+    }
+
+        .overlay-content img {
+            width: 100px;
+            height: 100px;
+        }
+
+    .form-group label {
+        color: #1e3a8a; /* Use the blue theme color */
+    }
+
+    .form-control, .form-control-file {
+        border: 1px solid #1e3a8a;
+    }
+
+        .form-control:focus, .form-control-file:focus {
+            box-shadow: none;
+            border-color: #4a90e2; /* Lighter blue for focus */
+        }
+</style>

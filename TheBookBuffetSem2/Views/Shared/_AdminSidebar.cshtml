@@ -1,0 +1,53 @@
+﻿<div class="sidebar">
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            @Html.ActionLink("Dashboard", "Index", "Home", new { area = "Admin" }, new { @class = "nav-link" })
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("Manage Venues", "Index", "Venue", new { area = "Admin" }, new { @class = "nav-link" })
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("Create Book Launch", "Create", "Event", new { area = "Admin" }, new { @class = "nav-link" })
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("View All Book Launches", "Index", "Event", new { area = "Admin" }, new { @class = "nav-link" })
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("Manage Authors", "Index", "Author", new { area = "Admin" }, new { @class = "nav-link" })
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("Manage Books", "Index", "Book", new { area = "Admin" }, new { @class = "nav-link" })
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("Manage Media Contacts", "Index", "Media", new { area = "Admin" }, new { @class = "nav-link" })
+        </li>
+    </ul>
+</div>
+
+<style>
+    .sidebar {
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-color: #333;
+        padding-top: 20px;
+    }
+
+        .sidebar .nav-link {
+            color: #fff;
+            font-size: 16px;
+            padding: 15px;
+        }
+            .sidebar .nav-link:hover {
+                background-color: #575757;
+            }
+            
+
+    .content-area {
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+</style>

@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+
+<h2 class="text-center mb-4" style="color: #1e3a8a;">Recruiter Dashboard</h2>
+
+<!-- Display success message if available -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" id="successMessage">
+        @TempData["SuccessMessage"]
+    </div>
+}
+<!-- Display error message if available -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" id="errorMessage">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<!-- Dashboard buttons -->
+<div class="btn-toolbar justify-content-center mb-4" role="toolbar">
+    <div class="btn-group">
+        <a href="@Url.Action("Create", "Jobs")" class="btn btn-primary" style="background-color: #1e3a8a; border-color: #1e3a8a;">Draft Job</a>
+        <a href="@Url.Action("Index", "Jobs")" class="btn btn-secondary" style="background-color: #4a90e2; border-color: #4a90e2;">Manage Jobs</a>
+    </div>
+</div>
+
+<!-- Bar Graph: Jobs vs. Applicants -->
+<div class="card">
+    <div class="card-header" style="background-color: #1e3a8a; color: white;">
+        <h3 class="mb-0">Job Listings and Applicants</h3>
+    </div>
+    <div class="card-body">
+        <canvas id="jobsApplicantsBarGraph" width="400" height="200"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Fetching data from ViewBag in Razor syntax
+        var jobTitles = @Html.Raw(Json.Encode(ViewBag.JobTitles)); // Job titles
+        var totalApplicants = @Html.Raw(Json.Encode(ViewBag.TotalApplicants)); // Total applicants per job
+        var hiredApplicants = @Html.Raw(Json.Encode(ViewBag.HiredApplicants)); // Hired applicants per job
+
+        var ctx = document.getElementById('jobsApplicantsBarGraph').getContext('2d');
+        var jobsApplicantsBarGraph = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: jobTitles, // Job titles from your data
+                datasets: [{
+                    label: 'Total Applicants',
+                    data: totalApplicants, // Total applicants data
+                    backgroundColor: 'rgba(30, 58, 138, 0.7)', // Blue shade for the total applicants bar
+                    borderColor: 'rgba(30, 58, 138, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Hired Applicants',
+                    data: hiredApplicants, // Hired applicants data
+                    backgroundColor: 'rgba(0, 200, 0, 0.7)', // Green shade for hired applicants
+                    borderColor: 'rgba(0, 200, 0, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                }
+            }
+        });
+
+        // Hide the success message after 3 seconds (3000 milliseconds)
+        setTimeout(function () {
+            var successMessage = document.getElementById("successMessage");
+            if (successMessage) {
+                successMessage.style.transition = "opacity 1s";
+                successMessage.style.opacity = "0";
+                setTimeout(function () {
+                    successMessage.remove();
+                }, 1000); // Additional 1 second delay for fade out effect
+            }
+        }, 3000);
+
+        // Hide the error message after 3 seconds (3000 milliseconds)
+        setTimeout(function () {
+            var errorMessage = document.getElementById("errorMessage");
+            if (errorMessage) {
+                errorMessage.style.transition = "opacity 1s";
+                errorMessage.style.opacity = "0";
+                setTimeout(function () {
+                    errorMessage.remove();
+                }, 1000); // Additional 1 second delay for fade out effect
+            }
+        }, 3000);
+
+        // Check if the post was successful and open the Facebook page in a new tab
+        var facebookSuccess = '@Request.QueryString["facebookSuccess"]';
+        if (facebookSuccess === 'True') {
+            window.open("https://www.facebook.com/The-Book-Buffet-402673519596997", "_blank");
+        }
+    </script>
+}

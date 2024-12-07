@@ -1,0 +1,387 @@
+﻿@model TheBookBuffetSem2.Models.Careers.JobTrackingViewModel
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" id="successMessage">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="errorMessage" class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+
+<div class="container pt-5 pb-5">
+    <h2 class="text-center mb-4">Applicants for @Model.Job.Title</h2>
+
+    @if (!Model.Applicants.Any())
+    {
+        <div class="alert alert-info">No applicants found for this job.</div>
+    }
+    else
+    {
+        <!-- Sort and Reset buttons -->
+        <div class="d-flex justify-content-end mb-3">
+            <button id="sort-by-recommendation" class="btn btn-primary">Sort by Recommendation</button>
+            <button id="reset-sort" class="btn btn-secondary d-none ml-2">Reset Sort</button>
+            <!-- Select Recommended button, hidden initially -->
+            <button id="select-recommended" class="btn btn-success d-none ml-2">Select Recommended Applicants</button>
+        </div>
+
+        
+
+
+        <!-- Loop through applicants -->
+        <div id="applicants-container">
+            @foreach (var applicant in Model.Applicants)
+            {
+
+                var rank = Model.RecommendedApplicants.Contains(applicant) ? Model.RecommendedApplicants.IndexOf(applicant) + 1 : 9999;  // Use 9999 for non-recommended applicants
+
+                
+
+
+                <div class="card mb-4 applicant-card" id="applicant-@applicant.ApplicantId"
+                     data-rank="@rank" data-overall-score="@applicant.OverallScore" data-applicant-id="@applicant.ApplicantId">
+
+                    <div class="card-header" style="background-color: #1e3a8a; color: white; cursor: pointer;" onclick="toggleDetails(@applicant.ApplicantId)">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">@applicant.FullName</h5>
+                                <small class="text-light">Application Date: @applicant.ApplicationDate.ToString("g")</small>
+                            </div>
+                            <div>
+                                <!-- Show Job Offer Status -->
+                                @if (!string.IsNullOrEmpty(applicant.JobStatus))
+                                {
+                                    <p><strong>Job Status:</strong> @applicant.JobStatus</p>
+                                }
+                            </div>
+                            <div>
+
+                                <!-- Display the dynamically calculated Overall Score -->
+                                <span class="badge badge-success">
+                                    Overall Score: @(applicant.OverallScore.HasValue ? $"{applicant.OverallScore:F2}%" : "N/A")
+                                </span>
+                                <button class="btn btn-light btn-sm expand-btn" id="expand-btn-@applicant.ApplicantId">Expand</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden section, to be shown when expanded -->
+                    <div class="card-body d-none" id="applicant-details-@applicant.ApplicantId">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p><strong>Email:</strong> @applicant.Email</p>
+                                <p><strong>Mobile Number:</strong> @applicant.MobileNumber</p>
+
+                                <!-- Scores Section -->
+                                <div class="scores mt-3">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>OCR Score:</h6>
+                                            <p>@applicant.OCRAccuracy%</p>
+                                        </div>
+
+                                        <!-- AudioSample Score Section -->
+                                        @if (applicant.AudioSampleScore.HasValue || !string.IsNullOrEmpty(applicant.AudioBlobUrl))
+                                        {
+                                            <div>
+                                                <h6>AudioSample Score:</h6>
+                                                <p id="audio-sample-score-@applicant.ApplicantId">
+                                                    @(applicant.AudioSampleScore.HasValue ? $"{applicant.AudioSampleScore.Value.ToString("F2")}%": "N/A")
+                                                    <small>(Tries: @applicant.AudioRetryCount)</small>
+                                                    <button class="btn btn-sm btn-light" onclick="editAudioScore(@applicant.ApplicantId)">✏️</button>
+                                                </p>
+                                                <div id="audio-score-edit-@applicant.ApplicantId" class="d-none">
+                                                    <input type="number" id="new-audio-score-@applicant.ApplicantId" class="form-control" placeholder="Score" style="width: 100px; display:inline;">
+                                                    <button class="btn btn-sm btn-light" onclick="saveAudioScore(@applicant.ApplicantId)">✔️</button>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div>
+                                                <h6>AudioSample Score:</h6>
+                                                <p>--</p>
+                                            </div>
+                                        }
+
+                                        <!-- Recommendation Badge or Passing Threshold Notice -->
+                                        @if (applicant.OverallScore >= 70)
+                                        {
+                                            if (rank > 0 && rank != 9999)  // Ensure we only display the rank if it's valid (not 9999)
+                                            {
+                                                <div class="recommended-hire">
+                                                    <strong>Recommended Hire</strong>
+                                                    <div class="big-number">@rank</div> <!-- Only show rank if it's valid -->
+                                                </div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="not-qualified-hire">
+                                                <small>70% is the passing recommendation</small>
+                                            </div>
+                                        }
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 text-right">
+                                <!-- Thumbnails for Documents -->
+                                <div class="document-thumbnails">
+                                    <img src="https://appdev3project.blob.core.windows.net/other/cvthumb.png" class="img-thumbnail" alt="CV" onclick="openDocument('@applicant.CVBlobUrl')" />
+                                    <img src="https://appdev3project.blob.core.windows.net/other/idthumb.png" class="img-thumbnail" alt="ID" onclick="openDocument('@applicant.IDBlobUrl')" />
+
+                                    <!-- Only show audio thumbnail if AudioBlobUrl exists -->
+                                    @if (!string.IsNullOrWhiteSpace(applicant.AudioBlobUrl))
+                                    {
+                                        <img src="https://appdev3project.blob.core.windows.net/other/mic.png" class="img-thumbnail" alt="Audio" onclick="openAudio('@applicant.AudioBlobUrl')" />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Hide the success message after 3 seconds (3000 milliseconds)
+        setTimeout(function () {
+            var successMessage = document.getElementById("successMessage");
+            if (successMessage) {
+                successMessage.style.transition = "opacity 1s";
+                successMessage.style.opacity = "0";
+                setTimeout(function () {
+                    successMessage.remove();
+                }, 1000); // Additional 1 second delay for fade out effect
+            }
+        }, 3000);
+        // Hide the error message after 3 seconds (3000 milliseconds)
+        setTimeout(function () {
+            var errorMessage = document.getElementById("errorMessage");
+            if (errorMessage) {
+                errorMessage.style.transition = "opacity 1s";
+                errorMessage.style.opacity = "0";
+                setTimeout(function () {
+                    errorMessage.remove();
+                }, 1000); // Additional 1 second delay for fade out effect
+            }
+        }, 3000);
+
+        // Toggle the details when expanding/collapsing the card
+        function toggleDetails(applicantId) {
+            var detailsSection = document.getElementById('applicant-details-' + applicantId);
+            var expandButton = document.getElementById('expand-btn-' + applicantId);
+
+            if (detailsSection.classList.contains('d-none')) {
+                detailsSection.classList.remove('d-none');
+                expandButton.textContent = 'Collapse';
+            } else {
+                detailsSection.classList.add('d-none');
+                expandButton.textContent = 'Expand';
+            }
+        }
+
+        // Event listener for "Sort by Recommendation"
+        // Event listener for "Sort by Recommendation"
+        document.getElementById('sort-by-recommendation').addEventListener('click', function () {
+            var applicantsContainer = document.getElementById('applicants-container');
+            var applicants = Array.from(applicantsContainer.getElementsByClassName('applicant-card'));
+
+            // Sort the applicants:
+            applicants.sort(function (a, b) {
+                var rankA = parseInt(a.getAttribute('data-rank')) || 9999; // Non-recommended applicants have rank 9999
+                var rankB = parseInt(b.getAttribute('data-rank')) || 9999; // Non-recommended applicants have rank 9999
+                var scoreA = parseFloat(a.getAttribute('data-overall-score')) || 0; // Default score of 0 if not available
+                var scoreB = parseFloat(b.getAttribute('data-overall-score')) || 0; // Default score of 0 if not available
+
+                // Sorting logic:
+                // 1. Recommended applicants (lower rank) come first.
+                // 2. If both are non-recommended (rank 9999), sort by score descending.
+                return (rankA - rankB) || (scoreB - scoreA);
+            });
+
+            // Clear and re-append sorted applicants
+            applicantsContainer.innerHTML = '';
+            applicants.forEach(function (applicant) {
+                applicantsContainer.appendChild(applicant);
+            });
+
+            // Show the reset button and the "Select Recommended Applicants" button
+            document.getElementById('reset-sort').classList.remove('d-none');
+            document.getElementById('sort-by-recommendation').classList.add('d-none');
+            document.getElementById('select-recommended').classList.remove('d-none'); // Show the button
+
+            // Expand all sorted applicants
+            applicants.forEach(function (applicant) {
+                toggleDetails(applicant.id.split('-')[1]);
+            });
+        });
+
+
+
+
+
+
+
+
+
+        // Event listener for "Select Recommended Applicants"
+        document.getElementById('select-recommended').addEventListener('click', function () {
+            var jobId = @Model.Job.JobId;
+            window.location.href = '@Url.Action("ContractDraft", "Jobs")?jobId=' + jobId;
+        });
+
+        // Reset button logic
+        document.getElementById('reset-sort').addEventListener('click', function () {
+            location.reload(); // Reload the page to reset sorting
+        });
+
+        function openDocument(url) {
+            var modal = document.createElement('div');
+            modal.classList.add('modal');
+            modal.innerHTML = `
+                                                   <div class="modal-content">
+                                                        <iframe src="/Jobs/ViewDocument?documentUrl=${encodeURIComponent(url)}" width="100%" height="600px"></iframe>
+                                                        <button class="btn btn-danger" onclick="closeModal()">Close</button>
+                                                  </div>
+                                               `;
+            document.body.appendChild(modal);
+        }
+
+        function openAudio(url) {
+            var modal = document.createElement('div');
+            modal.classList.add('modal');
+            modal.innerHTML = `
+                                                   <div class="modal-content">
+                                                        <h5>Audio Sample Text</h5>
+
+            <p>"The sun rises in the east and sets in the west. Every morning, people wake up and start their day with new energy. Walking in the park can help refresh your mind and body."</p>
+            <audio controls autoplay>
+                                                            <source src="${url}" type="audio/wav">
+                                                            Your browser does not support the audio element.
+                                                        </audio>
+                                                        <button class="btn btn-danger" onclick="closeModal()">Close</button>
+                                                  </div>
+                                               `;
+            document.body.appendChild(modal);
+        }
+
+        function closeModal() {
+            var modal = document.querySelector('.modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function editAudioScore(applicantId) {
+            document.getElementById('audio-score-edit-' + applicantId).classList.remove('d-none');
+        }
+
+        function saveAudioScore(applicantId) {
+            var newScore = document.getElementById('new-audio-score-' + applicantId).value;
+            if (newScore) {
+                // Send the updated score to the server
+                fetch(`/Jobs/UpdateAudioScore?applicantId=${applicantId}&newScore=${newScore}`, {
+                    method: 'POST'
+                }).then(response => {
+                    if (response.ok) {
+                        // Reload the page after saving the score
+                        location.reload();
+                    } else {
+                        alert('Failed to save the score. Please try again.');
+                    }
+                }).catch(error => {
+                    console.error('Error saving the score:', error);
+                    alert('Failed to save the score due to an error.');
+                });
+            } else {
+                alert('Please enter a valid score');
+            }
+        }
+
+    </script>
+}
+
+@section Styles {
+    <style>
+        .applicant-card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .expand-btn {
+            margin-left: 10px;
+        }
+
+        .document-thumbnails {
+            display: flex;
+            gap: 10px;
+        }
+
+            .document-thumbnails img {
+                width: 50px;
+                height: 50px;
+                cursor: pointer;
+            }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            width: 800px;
+        }
+
+        /* Styles for "Not Qualified" message */
+        .not-qualified-hire {
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Recommended hire badge */
+        .recommended-hire {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+            .recommended-hire .big-number {
+                font-size: 2rem;
+                color: #1e3a8a;
+            }
+    </style>
+}

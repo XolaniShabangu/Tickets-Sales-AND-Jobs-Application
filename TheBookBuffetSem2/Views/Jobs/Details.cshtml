@@ -1,0 +1,136 @@
+﻿@model TheBookBuffetSem2.Models.Careers.Job
+
+@{
+    ViewBag.Title = "Details";
+   // Optional, in case you want a more minimalistic layout for this page
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* light blue background */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center; /* center all content */
+        }
+
+        h2 {
+            color: #0056b3; /* dark blue color */
+        }
+
+        .details-container {
+            display: inline-block;
+            text-align: left; /* align text inside the block */
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+        }
+
+        dl {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        dt {
+            font-weight: bold;
+            color: #0056b3; /* dark blue for labels */
+            width: 45%;
+            padding: 8px;
+        }
+
+        dd {
+            width: 45%;
+            padding: 8px;
+        }
+
+        p {
+            margin-top: 20px;
+        }
+
+        a {
+            color: #007bff; /* blue links */
+            text-decoration: none;
+        }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+        .action-links {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="details-container">
+        <h2>Details</h2>
+        <h4>Job Information</h4>
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Title)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Title)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Qualifications)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Qualifications)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.OcrKeywords)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.OcrKeywords)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Published)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Published)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.ClosingDate)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.ClosingDate)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.CreatedDate)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.CreatedDate)
+            </dd>
+        </dl>
+        <div class="action-links">
+            @Html.ActionLink("Edit", "Edit", new { id = Model.JobId }) |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    </div>
+</body>
+</html>

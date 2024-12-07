@@ -1,0 +1,84 @@
+﻿@model TheBookBuffetSem2.Models.BuyTicketViewModel
+
+<section id="buy-tickets" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Buy Tickets for @Model.EventTitle</h2>
+
+        <form action="@Url.Action("ConfirmPurchase", "Tickets")" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label for="ticketCategory" class="text-light">Select Ticket Category:</label>
+                <div class="row">
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        <div class="col-md-4">
+                            <div class="card mb-4 text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title">@ticket.Category</h5>
+                                    <p class="card-text">
+                                        <span>@ticket.Price.ToString("C")</span><br />
+                                        <span>Remaining: @ticket.RemainingTickets</span>
+                                    </p>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="ticketId" id="ticket_@ticket.TicketID" value="@ticket.TicketID" @(Model.Tickets.First().TicketID == ticket.TicketID ? "checked" : "")>
+                                        <label class="form-check-label" for="ticket_@ticket.TicketID">
+                                            Select
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @*<div class="form-group">
+                <label for="quantity" class="text-light">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="@Model.Tickets.First().RemainingTickets" />
+            </div>*@
+
+            <button type="submit" class="btn btn-success btn-block mt-3">Confirm Purchase</button>
+        </form>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mt-3">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mt-3">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: #333; /* Darker text color for readability */
+        }
+
+        .card-title, .card-text, .form-check-label {
+            color: #333; /* Set a dark color for text */
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+    </style>
+}

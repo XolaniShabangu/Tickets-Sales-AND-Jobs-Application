@@ -1,0 +1,115 @@
+﻿@model TheBookBuffetSem2.Models.StaffDashboardViewModel
+
+<section id="staff-dashboard" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Staff Dashboard</h2>
+
+        <!-- HOW TO Guide -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="card bg-info text-white">
+                    <div class="card-header" style="cursor: pointer;" data-toggle="collapse" data-target="#howToGuide" aria-expanded="false" aria-controls="howToGuide">
+                        <h5 class="mb-0">
+                            HOW TO: Scan Tickets
+                            <span class="float-right">&#9660;</span> <!-- Down arrow -->
+                        </h5>
+                    </div>
+                    <div id="howToGuide" class="collapse">
+                        <div class="card-body">
+                            <p>Follow these steps to scan tickets:</p>
+                            <ol>
+                                <li>Click on the "Scan Tickets" button below.</li>
+                                <li>Select the event for which you want to scan tickets.</li>
+                                <li>Position the QR code in front of the scanner or camera and click Start Scan.</li>
+                                <li>The system will automatically validate the ticket and display the attendee's details.</li>
+                                <li>Ensure that the ticket is marked as "Checked In" in the system.</li>
+                                <li>The Page reloads after 5 seconds, so no need to keep reloading...</li>
+                                <li>Lastly, Smile for our Attendees...😊</li>
+                            </ol>
+                            <p>If you encounter any problems, please contact support or refer to the detailed guide in the documentation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <!-- Scan Tickets -->
+            <div class="col-md-6">
+                <div class="card bg-purple text-white text-center card-hover position-relative" style="cursor: pointer;" onclick="location.href='@Url.Action("SelectEventForScanning", "Attendance")'">
+                    <div class="card-body">
+                        <h5 style="position: relative;">
+                            <span class="emoji" style="font-size: 50px; position: absolute; top: -20px; left: -20px; opacity: 0.3;">📷</span>
+                            Scan Tickets
+                        </h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Upcoming Events -->
+            <div class="col-md-6">
+                <div class="card bg-success text-white text-center card-hover position-relative" style="cursor: pointer;" onclick="location.href='@Url.Action("Index", "Event")'">
+                    <div class="card-body">
+                        <h5 style="position: relative;">
+                            <span class="emoji" style="font-size: 50px; position: absolute; top: -20px; left: -20px; opacity: 0.3;">📅</span>
+                            View Upcoming Book Launches
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: #333;
+            position: relative;
+        }
+
+        .bg-purple {
+            background-color: #6a1b9a !important; /* Unique purple color */
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-info {
+            background-color: #17a2b8 !important;
+        }
+
+        .card-hover:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+
+        .emoji {
+            font-size: 50px;
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            opacity: 0.3;
+        }
+
+        .card-header {
+            cursor: pointer;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+}

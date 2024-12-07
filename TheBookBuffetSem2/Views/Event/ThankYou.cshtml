@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Thank You";
+}
+
+<section id="thank-you" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container text-center">
+        <h2 class="mb-4">Thank You</h2>
+        <p>@TempData["Message"]</p>
+        <p>Your ticket will be sent to your email shortly. Please check your inbox for further details.</p>
+        <p>If you have any questions, feel free to <a href="@Url.Action("Contact", "Home")" class="text-light">contact us</a>. We look forward to seeing you at the event!</p>
+        <p>You may now close this window.</p>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        a {
+            color: #ffc107; /* Gold color for links */
+            text-decoration: underline;
+        }
+
+            a:hover {
+                color: #ffd700; /* Lighter gold on hover */
+            }
+
+        h2 {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+    </style>
+}

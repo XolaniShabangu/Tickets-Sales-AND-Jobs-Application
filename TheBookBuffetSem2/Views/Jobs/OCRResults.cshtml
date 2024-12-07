@@ -1,0 +1,7 @@
+﻿@model TheBookBuffetSem2.Models.Careers.Applicant
+
+<div class="container text-center pt-5">
+    <h2>Application Successful!</h2>
+    <p>Your CV passed with an accuracy score of @Model.OCRAccuracy%. You are now moving to the next stage.</p>
+    <a href="@Url.Action("NextSteps", "Jobs", new { applicantId = Model.ApplicantId })" class="btn btn-primary">Next Steps</a>
+</div>

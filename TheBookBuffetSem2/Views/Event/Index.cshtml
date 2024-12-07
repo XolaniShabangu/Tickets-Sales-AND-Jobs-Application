@@ -1,0 +1,177 @@
+﻿@model IEnumerable<TheBookBuffetSem2.Models.EventVenueViewModel>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="success-message" class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@{
+    ViewBag.Title = "Book Launches";
+    bool hasPastEvents = false;
+}
+
+<section id="book-launches" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Book Launches</h2>
+
+        <form method="get" action="@Url.Action("Index", "Event")" class="mb-4">
+            <div class="form-row d-flex align-items-end">
+                <!-- Search by Author -->
+                <div class="form-group col-md-2">
+                    <label for="searchString" class="text-light">Search by Author</label>
+                    <input type="text" id="searchString" name="searchString" class="form-control bg-dark text-light border-secondary" value="@Request.QueryString["searchString"]" />
+                </div>
+
+                <!-- Search by Date -->
+                <div class="form-group col-md-2 ml-1">
+                    <label for="searchDate" class="text-light">Search by Date</label>
+                    <input type="date" id="searchDate" name="searchDate" class="form-control bg-dark text-light border-secondary" value="@Request.QueryString["searchDate"]" />
+                </div>
+
+                <!-- Search by Venue -->
+                <div class="form-group col-md-2 ml-1">
+                    <label for="searchVenue" class="text-light">Search by Venue</label>
+                    <input type="text" id="searchVenue" name="searchVenue" class="form-control bg-dark text-light border-secondary" value="@Request.QueryString["searchVenue"]" />
+                </div>
+
+                <!-- Search and Reset Buttons -->
+                <div class="form-group col-md-2 d-flex justify-content-end ml-1">
+                    <button type="submit" class="btn btn-primary mr-1">Search</button>
+                    <a href="@Url.Action("Index", "Event")" class="btn btn-secondary">Reset</a>
+                </div>
+            </div>
+        </form>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">No events found.</div>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                bool isPastEvent = item.Event.LaunchDate < DateTime.Now;
+
+                if (!hasPastEvents && isPastEvent)
+                {
+                    hasPastEvents = true;
+                    <div class="col-12 my-4">
+                        <h4 class="text-center text-muted">Past Book Launches</h4>
+                    </div>
+                }
+
+                <div class="card mb-4 bg-secondary text-white">
+                    <div class="card-header" style="background-color: #495057; color: #ffffff;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">@item.Event.BookTitle</h5>
+                                <small class="text-muted">@item.Event.LaunchDate.ToString("f")</small>
+                            </div>
+                            @if (isPastEvent)
+                            {
+                                <span class="badge badge-secondary">Past Event</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Author:</strong> @item.Event.Author</p>
+                        <p><strong>Venue:</strong> @(item.Venue != null ? item.Venue.Name : "No venue selected")</p>
+
+                        @if (!isPastEvent)
+                        {
+                            <p><strong>Guests Invited:</strong> <span class="badge badge-success">@((item.GuestsInvited) ? "Yes" : "No")</span></p>
+                            <p><strong>Tickets Created:</strong> <span class="badge badge-success">@((item.TicketsCreated) ? "Yes" : "No")</span></p>
+                        }
+                    </div>
+                    @if (!isPastEvent)
+                    {
+                        <div class="card-footer bg-light">
+                            <a href="@Url.Action("Details", "Event", new { id = item.Event.EventId, fromIndex = true })" class="btn btn-info">View Details</a>
+                            <a href="@Url.Action("InviteGuests", "Event", new { id = item.Event.EventId })" class="btn btn-primary">Invite Guests</a>
+                            <a href="@Url.Action("ManageTickets", "Tickets", new { eventId = item.Event.EventId })" class="btn btn-warning">Tickets</a>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .form-control {
+            background-color: #343a40;
+            color: #ecf0f1;
+            border: 1px solid #495057;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #3c3c3c;
+        }
+
+        .card-header {
+            border-bottom: none;
+            background-color: #495057;
+            color: #ffffff;
+        }
+
+        .card-footer {
+            border-top: none;
+            padding-top: 10px;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        setTimeout(function () {
+            var successMessage = document.getElementById("success-message");
+            if (successMessage) {
+                successMessage.style.display = "none";
+                successMessage.style.transition = "opacity 1s";
+                successMessage.style.opacity = "0";
+            }
+        }, 5000); // 5000 milliseconds = 5 seconds
+    </script>
+}

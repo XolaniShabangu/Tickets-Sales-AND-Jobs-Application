@@ -1,0 +1,47 @@
+﻿@{
+    ViewBag.Title = "Payment Failed";
+}
+
+<section id="payment-failed" class="pt-5 pb-5 bg-dark text-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <div class="sad-face mb-4">
+                    ☹️
+                </div>
+
+                <h2>@ViewBag.Title</h2>
+                <p>Unfortunately, your payment was not successful. Please try again or return to the event page to select another event.</p>
+
+                <a href="@Url.Action("UpcomingEvents", "Event")" class="btn btn-primary mt-4">Back to Events</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        .sad-face {
+            font-size: 80px;
+            color: #dc3545; /* Red color to signify failure */
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        h2 {
+            color: #dc3545; /* Red color for the heading to emphasize the failure */
+        }
+
+        p {
+            font-size: 18px;
+        }
+    </style>
+}
